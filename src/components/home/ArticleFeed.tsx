@@ -1,9 +1,10 @@
 import { Bookmark, Share2 } from "lucide-react";
-import {
-  feedArticles,
-  categoryLabels,
-  type ArticlePattern,
-} from "@/lib/mock-data";
+import { type ArticlePattern } from "@/lib/mock-data";
+import type { Article } from "@/lib/types";
+
+interface ArticleFeedProps {
+  articles: Article[];
+}
 
 function PatternSvg({ pattern }: { pattern: ArticlePattern }) {
   const common = {
@@ -113,7 +114,7 @@ function PatternSvg({ pattern }: { pattern: ArticlePattern }) {
   }
 }
 
-export function ArticleFeed() {
+export function ArticleFeed({ articles }: ArticleFeedProps) {
   return (
     <section aria-labelledby="feed-heading">
       <div className="flex items-center gap-3 border-b-2 border-foreground pb-2">
@@ -130,13 +131,13 @@ export function ArticleFeed() {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 md:gap-x-8 md:gap-y-10">
-        {feedArticles.map((article) => (
+        {articles.map((article) => (
           <article key={article.id} className="flex flex-col">
             <div className="mb-3 aspect-[16/9] overflow-hidden bg-foreground">
               <PatternSvg pattern={article.pattern} />
             </div>
             <span className="font-sans text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-accent">
-              {categoryLabels[article.category]}
+              {article.category}
             </span>
             <h3 className="mt-2 font-serif-display text-[18px] md:text-[21px] font-bold leading-snug">
               <a href="#" className="hover:text-accent transition-colors">

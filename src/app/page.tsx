@@ -9,8 +9,11 @@ import { ArticleFeed } from "@/components/home/ArticleFeed";
 import { MostRead } from "@/components/home/MostRead";
 import { Newsletter } from "@/components/home/Newsletter";
 import { LiveEvent } from "@/components/home/LiveEvent";
+import { fetchOrangeNews } from "@/lib/fetch-orange-news";
 
-export default function Home() {
+export default async function Home() {
+  const { articles } = await fetchOrangeNews();
+
   return (
     <>
       <TickerBar />
@@ -41,7 +44,7 @@ export default function Home() {
           style={{ animationDelay: "0.25s", animationFillMode: "both" }}
         >
           <div className="lg:col-span-8">
-            <ArticleFeed />
+            <ArticleFeed articles={articles} />
           </div>
           <aside className="lg:col-span-4">
             <MostRead />
