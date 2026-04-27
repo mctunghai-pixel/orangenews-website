@@ -1,6 +1,11 @@
-import { secondaryArticles, categoryLabels } from "@/lib/mock-data";
+import Link from "next/link";
+import type { Article } from "@/lib/types";
 
-export function SecondaryArticles() {
+interface SecondaryArticlesProps {
+  articles: Article[];
+}
+
+export function SecondaryArticles({ articles }: SecondaryArticlesProps) {
   return (
     <section
       aria-labelledby="secondary-heading"
@@ -20,10 +25,10 @@ export function SecondaryArticles() {
       </div>
 
       <ol className="divide-y divide-border border-b border-border">
-        {secondaryArticles.map((article, idx) => (
+        {articles.map((article, idx) => (
           <li key={article.id}>
-            <a
-              href="#"
+            <Link
+              href={`/articles/${article.slug}`}
               className="group -mx-2 flex items-start gap-3 px-2 py-4 transition-colors hover:bg-breaking"
             >
               <span className="w-5 shrink-0 pt-1 font-mono text-[11px] md:text-[12px] text-muted tabular-nums">
@@ -31,7 +36,7 @@ export function SecondaryArticles() {
               </span>
               <div className="min-w-0 flex-1">
                 <span className="font-sans text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-accent">
-                  {categoryLabels[article.category]}
+                  {article.category}
                 </span>
                 <h3 className="mt-1 font-serif-display text-[16px] md:text-[17px] font-bold leading-snug text-foreground transition-colors group-hover:text-accent">
                   {article.headline}
@@ -42,11 +47,11 @@ export function SecondaryArticles() {
                   </span>
                   <span className="text-muted">·</span>
                   <span className="font-mono text-[10px] md:text-[11px] text-muted tabular-nums">
-                    {article.readTime}
+                    {article.readTime} мин
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
           </li>
         ))}
       </ol>

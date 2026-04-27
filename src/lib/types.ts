@@ -83,6 +83,7 @@ export interface Article {
   score: number;
   pattern: ArticlePattern;
   hashtags: string[];
+  isMarketWatch: boolean;
 }
 
 // -----------------------------------------------------------------------------

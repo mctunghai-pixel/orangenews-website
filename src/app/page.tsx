@@ -14,21 +14,30 @@ import { fetchOrangeNews } from "@/lib/fetch-orange-news";
 export default async function Home() {
   const { articles } = await fetchOrangeNews();
 
+  // Filter news-only (exclude market watch) and sort by score desc
+  const newsArticles = articles
+    .filter((a) => !a.isMarketWatch)
+    .sort((a, b) => b.score - a.score);
+
+  const breakingArticle = newsArticles[0] ?? null;
+  const heroArticle = newsArticles[1] ?? newsArticles[0] ?? null;
+  const secondaryList = newsArticles.slice(2, 6);
+
   return (
     <>
       <TickerBar />
       <Header />
-      <BreakingStrip />
+      <BreakingStrip article={breakingArticle} />
       <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 pt-6 pb-12 md:px-6 md:pt-8 md:pb-16">
         <div
           className="grid animate-fade-up grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10"
           style={{ animationDelay: "0.05s", animationFillMode: "both" }}
         >
           <div className="lg:col-span-8">
-            <Hero />
+            {heroArticle && <Hero article={heroArticle} />}
           </div>
           <div className="lg:col-span-4">
-            <SecondaryArticles />
+            <SecondaryArticles articles={secondaryList} />
           </div>
         </div>
 

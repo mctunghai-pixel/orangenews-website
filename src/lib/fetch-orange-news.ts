@@ -151,6 +151,7 @@ function mapPost(post: OrangeNewsPost, idx: number): Article {
     score: post.score ?? 0,
     pattern: pickPattern(category),
     hashtags: post.hashtags || [],
+    isMarketWatch: post.is_market_watch === true || post.type === "market_watch",
   };
 }
 
@@ -172,6 +173,7 @@ function feedArticleToArticle(fa: FeedArticle, idx: number): Article {
     score: 10 - idx,
     pattern: fa.pattern,
     hashtags: [],
+    isMarketWatch: false,
   };
 }
 

@@ -16,14 +16,16 @@ export default async function ArticlePage({ params }: PageProps) {
     <article className="mx-auto max-w-3xl px-4 py-8 md:py-12">
       <Link
         href="/"
-        className="inline-block mb-8 font-sans text-[11px] md:text-[12px] uppercase tracking-wider text-muted hover:text-accent transition-colors"
+        className="mb-8 inline-flex items-center gap-1 font-sans text-[11px] md:text-[12px] uppercase tracking-wider text-muted hover:text-accent transition-colors"
       >
-        Нүүр хуудас руу буцах
+        ← Нүүр хуудас руу буцах
       </Link>
 
-      <span className="font-sans text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-accent">
-        {article.category}
-      </span>
+      <div className="mt-2">
+        <span className="font-sans text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-accent">
+          {article.category}
+        </span>
+      </div>
 
       <h1 className="mt-3 font-serif-display text-[28px] md:text-[40px] font-bold leading-tight">
         {article.headline}
