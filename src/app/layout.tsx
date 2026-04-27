@@ -6,6 +6,9 @@ import {
   IBM_Plex_Mono,
 } from "next/font/google";
 import "./globals.css";
+import { TickerBar } from "@/components/layout/TickerBar";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 
 const ptSerif = PT_Serif({
   weight: ["400", "700"],
@@ -57,7 +60,12 @@ export default function RootLayout({
       lang="mn"
       className={`${ptSerif.variable} ${merriweather.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <TickerBar />
+        <Header />
+        <div className="flex-1">{children}</div>
+        <Footer />
+      </body>
     </html>
   );
 }

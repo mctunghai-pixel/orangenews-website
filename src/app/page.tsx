@@ -1,6 +1,3 @@
-import { TickerBar } from "@/components/layout/TickerBar";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { BreakingStrip } from "@/components/home/BreakingStrip";
 import { Hero } from "@/components/home/Hero";
 import { SecondaryArticles } from "@/components/home/SecondaryArticles";
@@ -25,8 +22,6 @@ export default async function Home() {
 
   return (
     <>
-      <TickerBar />
-      <Header />
       <BreakingStrip article={breakingArticle} />
       <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 pt-6 pb-12 md:px-6 md:pt-8 md:pb-16">
         <div
@@ -62,7 +57,6 @@ export default async function Home() {
           </aside>
         </div>
       </main>
-      <Footer />
     </>
   );
 }
