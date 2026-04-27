@@ -16,6 +16,7 @@ import type {
 } from "./types";
 import { feedArticles } from "./mock-data";
 import type { FeedArticle } from "./mock-data";
+import { slugify } from "./slug";
 
 // -----------------------------------------------------------------------------
 // 1. Constants
@@ -137,6 +138,7 @@ function mapPost(post: OrangeNewsPost, idx: number): Article {
 
   return {
     id: generateId(sourceUrl, idx),
+    slug: slugify(post.original_title || post.headline || `post-${idx}`),
     category,
     headline: post.headline || post.original_title || "Untitled",
     excerpt: post.post_text?.substring(0, 200) || "",
@@ -157,6 +159,7 @@ function feedArticleToArticle(fa: FeedArticle, idx: number): Article {
   const category = mapMockCategory(fa.category);
   return {
     id: fa.id || `mock-${idx}`,
+    slug: slugify(fa.headline || `mock-${idx}`),
     category,
     headline: fa.headline,
     excerpt: fa.excerpt,
@@ -230,4 +233,10 @@ export async function fetchOrangeNews(): Promise<FetchOrangeNewsResult> {
       error: message,
     };
   }
+}
+
+/** Get a single article by its slug - used by /articles/[slug] route */
+export async function getPostBySlug(slug: string): Promise<Article | null> {
+  const { articles } = await fetchOrangeNews();
+  return articles.find((a) => a.slug === slug) ?? null;
 }

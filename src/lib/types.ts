@@ -70,6 +70,7 @@ export type ArticlePattern =
 /** Normalized article — consumed by Hero, SecondaryArticles, ArticleFeed */
 export interface Article {
   id: string;
+  slug: string;
   category: DisplayCategory;
   headline: string;
   excerpt: string;

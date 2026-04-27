@@ -1,4 +1,5 @@
 import { Bookmark, Share2 } from "lucide-react";
+import Link from "next/link";
 import { type ArticlePattern } from "@/lib/mock-data";
 import type { Article } from "@/lib/types";
 
@@ -140,9 +141,12 @@ export function ArticleFeed({ articles }: ArticleFeedProps) {
               {article.category}
             </span>
             <h3 className="mt-2 font-serif-display text-[18px] md:text-[21px] font-bold leading-snug">
-              <a href="#" className="hover:text-accent transition-colors">
+              <Link
+                href={`/articles/${article.slug}`}
+                className="hover:text-accent transition-colors"
+              >
                 {article.headline}
-              </a>
+              </Link>
             </h3>
             <p className="mt-2 line-clamp-3 font-serif-body text-[13px] md:text-[14px] leading-relaxed text-muted">
               {article.excerpt}
