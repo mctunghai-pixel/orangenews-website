@@ -1,0 +1,46 @@
+# Phase 3 Regression Test Endpoints
+# Updated: 2026-04-27
+# Production: https://orangenews-website.vercel.app
+# Local:      http://localhost:3000
+
+## Step 1 — Article detail route (commit 5d16d87)
+GET /articles/{any-valid-slug}             → 200, back link, article body, hashtags
+GET /articles/bogus-nonexistent-slug       → 404
+
+## Step 2 — Hero / Secondary / Breaking + isMarketWatch (commit ed66b58)
+GET /                                       → 200, BreakingStrip + Hero + Secondary
+                                              market_watch posts excluded from feeds
+                                              articles sorted by score desc
+
+## Step 3A — Chrome in root layout (commit bf60ff3)
+GET /                                       → 200, TickerBar + Header + Footer present
+GET /articles/{slug}                        → 200, TickerBar + Header + Footer present
+                                              (Step 1 oversight fixed)
+
+## Step 3B — Category dynamic routing (commit 1b503fb)
+GET /                                       → 200, nav links resolve to /category/{slug}
+GET /category/finance                       → 200, "САНХҮҮ" heading, N нийтлэл, no АВТО badge
+GET /category/tech                          → 200, "ТЕХНОЛОГИ" heading
+GET /category/economy                       → 200, "ЭДИЙН ЗАСАГ" heading
+GET /category/crypto                        → 200, "КРИПТО" heading
+GET /category/business                      → 200, "БИЗНЕС" heading
+GET /category/mongolia                      → 200, "МОНГОЛ" heading
+GET /category/opinion                       → 200, "САНАЛ БОДОЛ" + empty state UI
+GET /category/ai                            → 200, "AI" heading (may be empty)
+GET /category/bogus                         → 404 (notFound() triggered)
+
+## Manual visual checks (browser only, not in curl)
+- Mobile drawer: tap nav link → drawer closes + navigates
+- ArticleFeed cards: click headline → /articles/{slug}
+- Console: 0 errors, 0 hydration warnings
+- TickerBar position consistent across /, /articles/{slug}, /category/{slug}
+
+## Curl snippet (run all in one shot)
+URLS=(
+  / /category/finance /category/tech /category/economy /category/crypto
+  /category/business /category/mongolia /category/opinion /category/bogus
+  /articles/deepseek-v4-arrives-with-near-state-of-the-art-intelligence-1pucju
+)
+for u in "${URLS[@]}"; do
+  printf "%-90s %s\n" "$u" "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000$u)"
+done
