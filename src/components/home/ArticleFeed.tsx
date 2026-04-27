@@ -5,6 +5,8 @@ import type { Article } from "@/lib/types";
 
 interface ArticleFeedProps {
   articles: Article[];
+  /** undefined = default "Сүүлийн мэдээ" + АВТО badge; null = no header; string = custom header (no badge) */
+  heading?: string | null;
 }
 
 function PatternSvg({ pattern }: { pattern: ArticlePattern }) {
@@ -115,23 +117,35 @@ function PatternSvg({ pattern }: { pattern: ArticlePattern }) {
   }
 }
 
-export function ArticleFeed({ articles }: ArticleFeedProps) {
-  return (
-    <section aria-labelledby="feed-heading">
-      <div className="flex items-center gap-3 border-b-2 border-foreground pb-2">
-        <h2
-          id="feed-heading"
-          className="font-serif-display text-[18px] md:text-[22px] font-bold"
-        >
-          Сүүлийн мэдээ
-        </h2>
-        <span className="inline-flex items-center gap-1 bg-auto-bg px-1.5 py-0.5 font-sans text-[9px] md:text-[10px] font-semibold uppercase tracking-wider text-up">
-          <span className="inline-block h-1 w-1 rounded-full bg-up animate-pulse-dot" aria-hidden />
-          Авто
-        </span>
-      </div>
+export function ArticleFeed({ articles, heading }: ArticleFeedProps) {
+  const showHeader = heading !== null;
+  const headingText = heading === undefined ? "Сүүлийн мэдээ" : heading;
+  const showAutoBadge = heading === undefined;
 
-      <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 md:gap-x-8 md:gap-y-10">
+  return (
+    <section
+      {...(showHeader
+        ? { "aria-labelledby": "feed-heading" }
+        : { "aria-label": "Нийтлэлүүд" })}
+    >
+      {showHeader && (
+        <div className="flex items-center gap-3 border-b-2 border-foreground pb-2">
+          <h2
+            id="feed-heading"
+            className="font-serif-display text-[18px] md:text-[22px] font-bold"
+          >
+            {headingText}
+          </h2>
+          {showAutoBadge && (
+            <span className="inline-flex items-center gap-1 bg-auto-bg px-1.5 py-0.5 font-sans text-[9px] md:text-[10px] font-semibold uppercase tracking-wider text-up">
+              <span className="inline-block h-1 w-1 rounded-full bg-up animate-pulse-dot" aria-hidden />
+              Авто
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className={`grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 md:gap-x-8 md:gap-y-10 ${showHeader ? "mt-6" : ""}`}>
         {articles.map((article) => (
           <article key={article.id} className="flex flex-col">
             <div className="mb-3 aspect-[16/9] overflow-hidden bg-foreground">

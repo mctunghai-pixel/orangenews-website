@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Menu, Search, X, Bookmark, ChevronRight } from "lucide-react";
 
 const primaryNav = [
-  { label: "Санхүү", href: "#" },
-  { label: "Технологи", href: "#" },
-  { label: "Эдийн засаг", href: "#" },
-  { label: "Крипто", href: "#" },
-  { label: "Монгол", href: "#" },
-  { label: "Санал бодол", href: "#" },
+  { label: "Санхүү", href: "/category/finance" },
+  { label: "Технологи", href: "/category/tech" },
+  { label: "Эдийн засаг", href: "/category/economy" },
+  { label: "Крипто", href: "/category/crypto" },
+  { label: "Монгол", href: "/category/mongolia" },
+  { label: "Санал бодол", href: "/category/opinion" },
 ];
 
 export function Header() {
@@ -40,13 +41,13 @@ export function Header() {
           </button>
           <nav aria-label="Үндсэн цэс (зүүн)" className="hidden md:flex items-center gap-5">
             {primaryNav.slice(0, 3).map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 className="font-sans text-[12px] font-semibold uppercase tracking-wider text-foreground hover:text-accent transition-colors"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
@@ -65,13 +66,13 @@ export function Header() {
         <div className="flex items-center justify-end gap-1 md:gap-4">
           <nav aria-label="Үндсэн цэс (баруун)" className="hidden md:flex items-center gap-5">
             {primaryNav.slice(3).map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 className="font-sans text-[12px] font-semibold uppercase tracking-wider text-foreground hover:text-accent transition-colors"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
           <button
@@ -122,14 +123,14 @@ export function Header() {
             <ul className="flex-1 overflow-y-auto py-2">
               {primaryNav.map((link) => (
                 <li key={link.label}>
-                  <a
+                  <Link
                     href={link.href}
                     onClick={() => setDrawerOpen(false)}
                     className="flex items-center justify-between min-h-[44px] px-4 py-3 font-serif-display text-[16px] text-foreground hover:bg-breaking transition-colors"
                   >
                     {link.label}
                     <ChevronRight className="h-4 w-4 text-muted" aria-hidden />
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
