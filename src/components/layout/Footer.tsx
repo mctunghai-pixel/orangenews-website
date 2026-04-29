@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const socialLinks = [
-  { label: "Facebook", code: "FB", href: "#" },
-  { label: "Instagram", code: "IG", href: "#" },
-  { label: "Вэбсайт", code: "Web", href: "#" },
+  { label: "Facebook", code: "FB", href: "https://www.facebook.com/orangenews.mn" },
+  { label: "Instagram", code: "IG", href: "https://www.instagram.com/orangenews.official" },
+  { label: "Threads", code: "TH", href: "https://www.threads.net/@orangenews.official" },
 ];
 
 interface FooterLink {
@@ -40,30 +40,31 @@ const footerNav: FooterColumn[] = [
   {
     title: "Компани",
     links: [
-      { label: "Бидний тухай", href: "#" },
-      { label: "Редакцын баг", href: "#" },
-      { label: "Хамтран ажиллах", href: "#" },
-      { label: "Ажлын байр", href: "#" },
-      { label: "Холбоо барих", href: "#" },
+      { label: "Бидний тухай", href: "/about" },
+      { label: "Редакцийн баг", href: "/team" },
+      { label: "Хамтран ажиллах", href: "/partnership" },
+      { label: "Ажлын байр", href: "/careers" },
+      { label: "Холбоо барих", href: "/contact" },
     ],
   },
   {
     title: "Бүтээгдэхүүн",
     links: [
-      { label: "Newsletter", href: "#" },
-      { label: "RSS", href: "#" },
-      { label: "Podcast", href: "#" },
-      { label: "Апп", href: "#" },
-      { label: "API", href: "#" },
+      { label: "Newsletter", href: "/newsletter" },
+      { label: "RSS", href: "/rss" },
+      { label: "Podcast", href: "/podcast" },
+      { label: "Апп", href: "/app" },
+      { label: "API", href: "/api-docs" },
     ],
   },
   {
     title: "Хууль эрх зүй",
     links: [
-      { label: "Үйлчилгээний нөхцөл", href: "#" },
-      { label: "Нууцлал", href: "#" },
-      { label: "Cookie", href: "#" },
-      { label: "Impressum", href: "#" },
+      { label: "Үйлчилгээний нөхцөл", href: "/legal/terms" },
+      { label: "Нууцлал", href: "/legal/privacy" },
+      { label: "Cookie", href: "/legal/cookies" },
+      { label: "Эх сурвалж", href: "/legal/data-sources" },
+      { label: "Импрессум", href: "/legal/impressum" },
     ],
   },
 ];
@@ -75,12 +76,12 @@ export function Footer() {
       <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 md:py-14">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[repeat(14,minmax(0,1fr))]">
           <div className="lg:col-span-4">
-            <a href="/" className="flex items-center gap-2" aria-label="Orange News нүүр">
+            <Link href="/" className="flex items-center gap-2" aria-label="Orange News нүүр">
               <span className="inline-block h-2 w-2 rounded-full bg-accent" aria-hidden />
               <span className="font-serif-display text-[22px] font-bold">
                 Orange News
               </span>
-            </a>
+            </Link>
             <p className="mt-3 max-w-sm font-serif-body text-[13px] leading-relaxed text-muted">
               Bloomberg-ийг санагдуулам монгол санхүү, эдийн засгийн редакцлагдсан урсгал. Автомат pipeline-д тулгуурласан шинэчлэлт.
             </p>
@@ -89,6 +90,8 @@ export function Footer() {
                 <a
                   key={s.code}
                   href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={s.label}
                   className="flex min-h-[36px] min-w-[36px] items-center justify-center border border-border px-2 font-sans text-[11px] font-semibold uppercase tracking-wider text-foreground transition-colors hover:border-accent hover:text-accent"
                 >
@@ -116,6 +119,8 @@ export function Footer() {
                     ) : (
                       <a
                         href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="font-serif-body text-[13px] text-foreground hover:text-accent transition-colors"
                       >
                         {link.label}
