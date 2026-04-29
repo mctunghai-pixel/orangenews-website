@@ -2,18 +2,22 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 4 — IN PROGRESS (Step 1/3, 33%)
+## Current phase: Phase 4 — IN PROGRESS (Step 2/3, ~90%)
 
 | Step | Commit | Description |
 |---|---|---|
 | 1a | `b70e15e` | OG helper + bundled fonts (Noto Sans Cyrillic+Latin subset, ~92KB) |
 | 1b | `6ab992f` | opengraph-image routes (3 segments) + Twitter card metadata + env-aware `metadataBase` |
-| 2 | _pending_ | MarketWatch detail page (`/markets/[ticker]`) |
+| 2a | `59e42a8` | Market data layer (types, slug map, fetcher, mock data) |
+| 2b | `6445941` | TickerBar wired to live data + clickable links to `/markets/{slug}` |
+| 2c | `2239f75` | `/markets/[ticker]` detail page (Hero + tabbed Chart + Stats grid) |
+| 2d-1 | `0b446c6` | Hero LineChart reuse + real SPX 30-day data wiring |
+| 2d-2 | `da1976c` | MNT/USD → USD/MNT (Bloomberg FX convention fix) |
 | 3 | _TBD_ | _scope to be defined_ |
 
-Step 1 production-verified on https://orangenews-website.vercel.app — 5 OG endpoints (homepage, article, category, article-fallback, category-fallback) all rendering 1200x630 PNG with Mongolian Cyrillic.
+Steps 1+2 production-verified on https://orangenews-website.vercel.app — see `test_phase4.txt` for regression endpoints.
 
-**Pending manual test**: Facebook Sharing Debugger — https://developers.facebook.com/tools/debug/ — verifies the Facebook scraper picks up the OG image. Target URL: `/articles/deepseek-v4-arrives-with-near-state-of-the-art-intelligence-1pucju`.
+**Pending manual test** (Step 1): Facebook Sharing Debugger — https://developers.facebook.com/tools/debug/ — verifies the Facebook scraper picks up the OG image. Target: `/articles/deepseek-v4-arrives-with-near-state-of-the-art-intelligence-1pucju`.
 
 ---
 
@@ -54,19 +58,62 @@ Step 1 production-verified on https://orangenews-website.vercel.app — 5 OG end
 
 ---
 
+## Architectural decisions (Phase 4 Step 2)
+
+### 1. Mock-first data approach (Stage 1)
+- `mock-market-data.ts` is the rendering source of truth until backend pipeline pushes `market_data.json`
+- `fetchMarketData()` tries GitHub raw URL → falls back to mock on any error (404 expected pre-Stage 2)
+- **Pragmatic engineering**: UI layer not blocked on backend; pipeline integration is a separate Phase 5+ concern
+- Auto-promotes to live data when `market_data.json` appears at `MARKET_DATA_URL` — zero code change required
+- Env override: `process.env.MARKET_DATA_URL` for testing alternate sources
+
+### 2. Loader pattern — server fetch + client render separation (`TickerBarLoader.tsx`)
+- Server async wrapper performs the fetch, passes data to inner client component as a typed prop
+- Client component (`TickerBar.tsx`) keeps `useEffect` for live clock + scroll animation interactivity
+- Reusable architectural primitive — future `SearchLoader`, `MostReadLoader`, etc. can adopt the same shape
+- Layout (`app/layout.tsx`) stays a thin chrome composition; data fetching co-located with component
+
+### 3. Asset-class differentiated price formatting (`format-market.ts`)
+- Bloomberg convention: `$` prefix for **crypto + commodity only** (BTC, ETH, GOLD, OIL WTI)
+- Indices and FX render bare numbers (S&P 500 `6,852.34`, USD/MNT `3,475.00`)
+- Crypto ≥ $1,000 omits decimals (`$68,420`, `$3,812`); below threshold keeps 2 decimals (`$0.42`)
+- Single helper `formatValue(n, asset)` shared between TickerBar (`formatPrice`) and Stats grid
+
+### 4. Hardcoded `CHART_TONES` with `TODO(Phase 5)` migration marker
+- `LineChart.tsx` uses literal hex (`#FF6B1A` / `#16A34A` / `#DC2626`) for stroke + gradient color
+- Comment in source flags Phase 5 task: migrate to `globals.css` design tokens (`--color-up`, `--color-down`)
+- Step 2C scope discipline — color-token migration deferred to avoid scope drift
+
+### 5. Brand vs directional chart tone (Hero vs MarketChart)
+- **Hero (homepage decoration)**: `tone="accent"` — orange brand color regardless of market direction
+- **MarketChart (detail page)**: `tone={changePct >= 0 ? "up" : "down"}` — green/red directional
+- **MarketHero sparkline (detail page)**: matches MarketChart directional tone
+- Bloomberg/WSJ pattern: hero is identity, detail is information
+
+### 6. URL backward compatibility on display-field correction (USD/MNT fix)
+- Bloomberg convention: higher-value currency is the base — quote `USD/MNT 3,475` not `MNT/USD 3,475`
+- Step 2D-2 fixed `symbol` + `name` display fields in mock data + slug map
+- **Slug `/markets/mntusd` URL preserved** — bookmarks remain valid
+- Pattern: when correcting label data, keep URL slug stable; rename display fields only
+
+---
+
 ## Phase 4 — remaining
 
-- **Step 2** (next): MarketWatch detail page (`/markets/[ticker]`) — plan pending
-- **Step 3** (TBD): scope undefined
+- **Step 3** (TBD): scope undefined. Candidates from backlog:
+  - Search wiring (Header search button currently inert)
+  - Bookmark feature (localStorage + Header bookmark icon)
+  - Hostinger migration evaluation
+  - `tsconfig.json` exclude `backups/` (TS noise cleanup)
 
-### Backlog (not yet scoped into a step)
-- Hostinger migration evaluation
-- Vercel cron migration for `translated_posts.json` updates
-- Search wiring (Header search button currently inert)
-- Bookmark feature (localStorage + Header bookmark icon)
-- `tsconfig.json` exclude `backups/` (TS noise cleanup)
+### Backlog (cross-step)
+- Vercel cron migration for `translated_posts.json` updates (Stage 2 backend pipeline)
+- Phase 5: migrate `CHART_TONES` to `globals.css` tokens
+- Phase 5: refactor `formatPrice(instrument)` to call `formatValue(price, asset)` (DRY)
+- Phase 5: ticker tagging on articles → related news on `/markets/[ticker]` detail page
+- Phase 5: 1D / 1Y timeframe tabs (requires backend intraday + 252-day depth)
 
-See `test_phase3.txt` for the regression endpoint list.
+See `test_phase4.txt` for regression endpoint list.
 
 ---
 

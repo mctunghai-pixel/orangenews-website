@@ -1,0 +1,72 @@
+# Phase 4 Regression Test Endpoints
+# Updated: 2026-04-29
+# Production: https://orangenews-website.vercel.app
+# Local:      http://localhost:3000
+
+## Step 1 — OG image generation (commits b70e15e, 6ab992f)
+GET /opengraph-image                                       → 200, image/png 1200x630, "Монгол Улсын санхүүгийн мэдээ"
+GET /articles/{any-valid-slug}/opengraph-image             → 200, image/png with category badge + headline (line-clamped)
+GET /articles/bogus-nonexistent-slug/opengraph-image       → 200, image/png "Нийтлэл олдсонгүй" fallback (NOT 404)
+GET /category/finance/opengraph-image                      → 200, image/png with "САНХҮҮ" + count
+GET /category/bogus/opengraph-image                        → 200, image/png homepage fallback (NOT 404)
+
+## Step 2A — Market data layer (commit 59e42a8)
+TypeScript-only, no endpoints. Verify:
+- `npx tsc --noEmit` passes
+- import { fetchMarketData } from "@/lib/fetch-market-data" — works
+- 8 instruments in MOCK_MARKET_DATA: spx, dji, ixic, btc, eth, mntusd, xau, cl
+
+## Step 2B — TickerBar wiring (commit 6445941)
+GET /                                                      → 200, TickerBar shows 8 instruments × 2 loop
+                                                             each item is an <a href="/markets/{slug}">
+                                                             hover: subtle white tint (bg-background/10)
+                                                             scroll pauses on hover
+
+## Step 2C — markets/[ticker] detail page (commit 2239f75)
+GET /markets/spx                  → 200, "S&P 500" header, $-less 6,852.34, +28.71/+0.42% green, 5 stats
+GET /markets/dji                  → 200, "DOW", -47.10/-0.12% red, 5 stats
+GET /markets/ixic                 → 200, "NASDAQ", +130.74/+0.78% green, 5 stats
+GET /markets/btc                  → 200, "BTC" $68,420 (no decimals), +1.84% green, volume24h + marketCap
+GET /markets/eth                  → 200, "ETH" $3,812 (no decimals — >=$1k threshold), +2.31% green
+GET /markets/mntusd               → 200, "USD/MNT" (post Step 2D-2), bare 3,475.00, sparse stats (1 item)
+GET /markets/xau                  → 200, "GOLD" $2,381.50 (with $), +0.56% green
+GET /markets/cl                   → 200, "OIL WTI" $81.70, -0.50% red
+GET /markets/bogus                → 404 (notFound() triggered)
+
+Tab toggle on each: 1W → 1M chart redraws, no flicker, gradient ID unique
+Chart tone: green when changePct >= 0, red otherwise (matches MarketHero sparkline)
+
+## Step 2D — Hero LineChart reuse + USD/MNT fix (commits 0b446c6, da1976c)
+GET /                             → 200, Hero chart is 30-segment SPX wave (history1m), orange accent
+                                    overlay text reads "S&P 500 · +0.42%" (live data, not hardcoded)
+                                    inline ChartSvg removed — now uses shared LineChart from /charts/
+
+## Cross-step regression
+GET /                             → 200, BreakingStrip + Hero + Secondary + ArticleFeed all render
+GET /articles/{slug}              → 200, body line-height 1.8 (Phase 4 typography polish)
+GET /category/{slug}              → 200, all Phase 3 routes still working
+
+## Manual visual checks (browser only)
+- Homepage Hero: smooth 30-point SPX curve, orange tone, dynamic overlay
+- TickerBar 6th item: "USD/MNT  3,475.00  -0.08%" (was MNT/USD pre-2D-2)
+- /markets/spx → green change color, sparkline matches main chart tone
+- /markets/dji → red change color
+- Mobile: stats grid 2-column, chart full-width, tabs tappable
+- Chart tab toggle: state preserved on rerender, no SSR/CSR mismatch
+- Console: 0 errors, 0 hydration warnings
+
+## Curl snippet (run all in one shot)
+URLS=(
+  /
+  /opengraph-image
+  /markets/spx /markets/dji /markets/ixic /markets/btc /markets/eth
+  /markets/mntusd /markets/xau /markets/cl /markets/bogus
+  /articles/deepseek-v4-arrives-with-near-state-of-the-art-intelligence-1pucju
+  /articles/deepseek-v4-arrives-with-near-state-of-the-art-intelligence-1pucju/opengraph-image
+)
+for u in "${URLS[@]}"; do
+  printf "%-90s %s\n" "$u" "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000$u)"
+done
+
+## Manual external test
+- Facebook Sharing Debugger: https://developers.facebook.com/tools/debug/ → paste article URL → verify og:image
