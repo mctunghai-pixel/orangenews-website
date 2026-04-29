@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ticker } from "@/lib/mock-data";
+import type { MarketInstrument } from "@/lib/types";
+import { formatPrice, formatChangePct } from "@/lib/format-market";
 
 function formatClock(date: Date): string {
   const hh = String(date.getHours()).padStart(2, "0");
@@ -10,7 +12,11 @@ function formatClock(date: Date): string {
   return `${hh}:${mm}:${ss}`;
 }
 
-export function TickerBar() {
+interface TickerBarProps {
+  items: MarketInstrument[];
+}
+
+export function TickerBar({ items }: TickerBarProps) {
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -19,7 +25,7 @@ export function TickerBar() {
     return () => clearInterval(id);
   }, []);
 
-  const items = [...ticker, ...ticker];
+  const loop = [...items, ...items];
 
   return (
     <div
@@ -46,26 +52,26 @@ export function TickerBar() {
 
         <div className="relative flex-1 overflow-hidden">
           <div className="flex w-max animate-ticker-mobile md:animate-ticker-desktop hover:[animation-play-state:paused]">
-            {items.map((item, idx) => {
-              const up = item.change >= 0;
+            {loop.map((item, idx) => {
+              const up = item.changePct >= 0;
               return (
-                <div
-                  key={`${item.symbol}-${idx}`}
-                  className="flex items-center gap-2 px-4 md:px-5 py-1.5 md:py-2 whitespace-nowrap"
+                <Link
+                  key={`${item.slug}-${idx}`}
+                  href={`/markets/${item.slug}`}
+                  className="flex items-center gap-2 px-4 md:px-5 py-1.5 md:py-2 whitespace-nowrap hover:bg-background/10 transition-colors duration-150"
                 >
                   <span className="font-sans text-[10px] md:text-[11px] font-semibold uppercase tracking-wide">
                     {item.symbol}
                   </span>
                   <span className="font-mono text-[10px] md:text-[11px] text-background/80 tabular-nums">
-                    {item.value}
+                    {formatPrice(item)}
                   </span>
                   <span
                     className={`font-mono text-[10px] md:text-[11px] tabular-nums ${up ? "text-up" : "text-down"}`}
                   >
-                    {up ? "+" : ""}
-                    {item.change.toFixed(2)}%
+                    {formatChangePct(item.changePct)}
                   </span>
-                </div>
+                </Link>
               );
             })}
           </div>

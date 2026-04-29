@@ -6,7 +6,7 @@ import {
   IBM_Plex_Mono,
 } from "next/font/google";
 import "./globals.css";
-import { TickerBar } from "@/components/layout/TickerBar";
+import { TickerBarLoader } from "@/components/layout/TickerBarLoader";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -71,7 +71,7 @@ export default function RootLayout({
       className={`${ptSerif.variable} ${merriweather.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <TickerBar />
+        <TickerBarLoader />
         <Header />
         <div className="flex-1">{children}</div>
         <Footer />
