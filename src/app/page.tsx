@@ -7,9 +7,14 @@ import { MostRead } from "@/components/home/MostRead";
 import { Newsletter } from "@/components/home/Newsletter";
 import { LiveEvent } from "@/components/home/LiveEvent";
 import { fetchOrangeNews } from "@/lib/fetch-orange-news";
+import { fetchMarketData } from "@/lib/fetch-market-data";
 
 export default async function Home() {
-  const { articles } = await fetchOrangeNews();
+  const [{ articles }, { instruments }] = await Promise.all([
+    fetchOrangeNews(),
+    fetchMarketData(),
+  ]);
+  const spx = instruments.spx;
 
   // Filter news-only (exclude market watch) and sort by score desc
   const newsArticles = articles
@@ -29,7 +34,9 @@ export default async function Home() {
           style={{ animationDelay: "0.05s", animationFillMode: "both" }}
         >
           <div className="lg:col-span-8">
-            {heroArticle && <Hero article={heroArticle} />}
+            {heroArticle && spx && (
+              <Hero article={heroArticle} marketInstrument={spx} />
+            )}
           </div>
           <div className="lg:col-span-4">
             <SecondaryArticles articles={secondaryList} />

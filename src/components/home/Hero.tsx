@@ -1,61 +1,24 @@
 import Link from "next/link";
 import { Clock } from "lucide-react";
-import type { Article } from "@/lib/types";
-
-function ChartSvg({ points }: { points: number[] }) {
-  const width = 640;
-  const height = 240;
-  const padding = 12;
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const range = max - min || 1;
-  const stepX = (width - padding * 2) / (points.length - 1);
-
-  const coords = points.map((p, i) => {
-    const x = padding + i * stepX;
-    const y = height - padding - ((p - min) / range) * (height - padding * 2);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
-
-  const linePath = `M ${coords.join(" L ")}`;
-  const areaPath = `${linePath} L ${width - padding},${height - padding} L ${padding},${height - padding} Z`;
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="h-full w-full"
-      preserveAspectRatio="none"
-      role="img"
-      aria-label="S&P 500 өнөөдрийн хөдөлгөөн"
-    >
-      <defs>
-        <linearGradient id="hero-chart-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FF6B1A" stopOpacity="0.22" />
-          <stop offset="100%" stopColor="#FF6B1A" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={areaPath} fill="url(#hero-chart-grad)" />
-      <path
-        d={linePath}
-        fill="none"
-        stroke="#FF6B1A"
-        strokeWidth="2"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+import type { Article, MarketInstrument } from "@/lib/types";
+import { LineChart } from "@/components/charts/LineChart";
+import { formatChangePct } from "@/lib/format-market";
 
 interface HeroProps {
   article: Article;
+  marketInstrument: MarketInstrument;
 }
 
-export function Hero({ article }: HeroProps) {
+export function Hero({ article, marketInstrument }: HeroProps) {
   return (
     <article className="flex flex-col">
       <div className="relative aspect-[16/10] md:aspect-[16/9] overflow-hidden bg-foreground">
-        <ChartSvg points={[40, 42, 38, 50, 55, 48, 62, 68, 65, 72, 75, 70, 80]} />
+        <LineChart
+          points={marketInstrument.history1m}
+          tone="accent"
+          ariaLabel={`${marketInstrument.symbol} 30 хоногийн хөдөлгөөн`}
+          gradientId="hero-chart-grad"
+        />
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-foreground via-foreground/70 to-transparent p-4 md:p-6">
           <div className="flex items-center gap-2">
             <span className="font-sans text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-accent">
@@ -65,7 +28,8 @@ export function Hero({ article }: HeroProps) {
               •
             </span>
             <span className="font-mono text-[9px] md:text-[10px] text-background/70 tabular-nums">
-              S&amp;P 500 · +0.42%
+              {marketInstrument.symbol} ·{" "}
+              {formatChangePct(marketInstrument.changePct)}
             </span>
           </div>
         </div>
