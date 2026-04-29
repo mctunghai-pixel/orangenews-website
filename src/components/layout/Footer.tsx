@@ -20,12 +20,12 @@ const footerNav: FooterColumn[] = [
   {
     title: "Сэдвүүд",
     links: [
-      { label: "Санхүү", href: "#" },
-      { label: "Технологи", href: "#" },
-      { label: "Эдийн засаг", href: "#" },
-      { label: "Крипто", href: "#" },
-      { label: "Монгол", href: "#" },
-      { label: "Санал бодол", href: "#" },
+      { label: "Санхүү", href: "/category/finance" },
+      { label: "Технологи", href: "/category/tech" },
+      { label: "Эдийн засаг", href: "/category/economy" },
+      { label: "Крипто", href: "/category/crypto" },
+      { label: "Монгол", href: "/category/mongolia" },
+      { label: "Санал бодол", href: "/category/opinion" },
     ],
   },
   {
