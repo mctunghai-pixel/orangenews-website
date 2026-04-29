@@ -41,7 +41,7 @@ export default async function ArticlePage({ params }: PageProps) {
 
       <hr className="my-8 border-t border-foreground/10" />
 
-      <div className="font-serif-body text-[16px] md:text-[17px] leading-relaxed whitespace-pre-line">
+      <div className="font-serif-body text-[16px] md:text-[17px] leading-[1.8] whitespace-pre-line">
         {article.body}
       </div>
 
