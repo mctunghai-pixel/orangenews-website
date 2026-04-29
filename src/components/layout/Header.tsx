@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, Search, X, Bookmark, ChevronRight } from "lucide-react";
 
+const marketWatchLink = { label: "Market Watch", href: "/market-watch" };
+
 const primaryNav = [
   { label: "Санхүү", href: "/category/finance" },
   { label: "Технологи", href: "/category/tech" },
@@ -40,6 +42,16 @@ export function Header() {
             <Menu className="h-5 w-5" aria-hidden />
           </button>
           <nav aria-label="Үндсэн цэс (зүүн)" className="hidden md:flex items-center gap-5">
+            <Link
+              href={marketWatchLink.href}
+              className="inline-flex items-center gap-1.5 font-sans text-[12px] font-semibold uppercase tracking-wider text-accent hover:text-accent-hover transition-colors"
+            >
+              <span
+                className="inline-block h-1.5 w-1.5 rounded-full bg-accent animate-pulse-dot"
+                aria-hidden
+              />
+              {marketWatchLink.label}
+            </Link>
             {primaryNav.slice(0, 3).map((link) => (
               <Link
                 key={link.label}
@@ -121,6 +133,22 @@ export function Header() {
               </button>
             </div>
             <ul className="flex-1 overflow-y-auto py-2">
+              <li>
+                <Link
+                  href={marketWatchLink.href}
+                  onClick={() => setDrawerOpen(false)}
+                  className="flex items-center justify-between min-h-[44px] px-4 py-3 font-serif-display text-[16px] text-accent hover:bg-breaking transition-colors"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <span
+                      className="inline-block h-2 w-2 rounded-full bg-accent animate-pulse-dot"
+                      aria-hidden
+                    />
+                    {marketWatchLink.label}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-muted" aria-hidden />
+                </Link>
+              </li>
               {primaryNav.map((link) => (
                 <li key={link.label}>
                   <Link
