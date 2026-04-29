@@ -1,38 +1,70 @@
+import Link from "next/link";
+
 const socialLinks = [
   { label: "Facebook", code: "FB", href: "#" },
   { label: "Instagram", code: "IG", href: "#" },
   { label: "Вэбсайт", code: "Web", href: "#" },
 ];
 
-const footerNav = [
+interface FooterLink {
+  label: string;
+  href: string;
+}
+
+interface FooterColumn {
+  title: string;
+  links: FooterLink[];
+}
+
+const footerNav: FooterColumn[] = [
   {
     title: "Сэдвүүд",
     links: [
-      "Санхүү",
-      "Технологи",
-      "Эдийн засаг",
-      "Крипто",
-      "Монгол",
-      "Санал бодол",
+      { label: "Санхүү", href: "#" },
+      { label: "Технологи", href: "#" },
+      { label: "Эдийн засаг", href: "#" },
+      { label: "Крипто", href: "#" },
+      { label: "Монгол", href: "#" },
+      { label: "Санал бодол", href: "#" },
+    ],
+  },
+  {
+    title: "Зах зээл",
+    links: [
+      { label: "S&P 500", href: "/markets/spx" },
+      { label: "Bitcoin", href: "/markets/btc" },
+      { label: "USD/MNT", href: "/markets/mntusd" },
+      { label: "Алт", href: "/markets/xau" },
     ],
   },
   {
     title: "Компани",
     links: [
-      "Бидний тухай",
-      "Редакцын баг",
-      "Хамтран ажиллах",
-      "Ажлын байр",
-      "Холбоо барих",
+      { label: "Бидний тухай", href: "#" },
+      { label: "Редакцын баг", href: "#" },
+      { label: "Хамтран ажиллах", href: "#" },
+      { label: "Ажлын байр", href: "#" },
+      { label: "Холбоо барих", href: "#" },
     ],
   },
   {
     title: "Бүтээгдэхүүн",
-    links: ["Newsletter", "RSS", "Podcast", "Апп", "API"],
+    links: [
+      { label: "Newsletter", href: "#" },
+      { label: "RSS", href: "#" },
+      { label: "Podcast", href: "#" },
+      { label: "Апп", href: "#" },
+      { label: "API", href: "#" },
+    ],
   },
   {
     title: "Хууль эрх зүй",
-    links: ["Үйлчилгээний нөхцөл", "Нууцлал", "Cookie", "Impressum"],
+    links: [
+      { label: "Үйлчилгээний нөхцөл", href: "#" },
+      { label: "Нууцлал", href: "#" },
+      { label: "Cookie", href: "#" },
+      { label: "Impressum", href: "#" },
+    ],
   },
 ];
 
@@ -41,7 +73,7 @@ export function Footer() {
   return (
     <footer className="mt-16 border-t border-border bg-background">
       <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 md:py-14">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[repeat(14,minmax(0,1fr))]">
           <div className="lg:col-span-4">
             <a href="/" className="flex items-center gap-2" aria-label="Orange News нүүр">
               <span className="inline-block h-2 w-2 rounded-full bg-accent" aria-hidden />
@@ -73,13 +105,22 @@ export function Footer() {
               </h3>
               <ul className="mt-4 space-y-3">
                 {col.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="font-serif-body text-[13px] text-foreground hover:text-accent transition-colors"
-                    >
-                      {link}
-                    </a>
+                  <li key={link.label}>
+                    {link.href.startsWith("/") ? (
+                      <Link
+                        href={link.href}
+                        className="font-serif-body text-[13px] text-foreground hover:text-accent transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={link.href}
+                        className="font-serif-body text-[13px] text-foreground hover:text-accent transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
