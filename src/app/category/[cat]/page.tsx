@@ -2,7 +2,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArticleFeed } from "@/components/home/ArticleFeed";
 import { fetchOrangeNews } from "@/lib/fetch-orange-news";
-import { isValidCategorySlug, slugToCategory } from "@/lib/category-slug";
+import {
+  isValidCategorySlug,
+  slugToCategory,
+  getCategoryMatchValues,
+} from "@/lib/category-slug";
 
 interface PageProps {
   params: Promise<{ cat: string }>;
@@ -13,9 +17,10 @@ export default async function CategoryPage({ params }: PageProps) {
   if (!isValidCategorySlug(cat)) notFound();
 
   const category = slugToCategory(cat);
+  const matchValues = getCategoryMatchValues(category);
   const { articles } = await fetchOrangeNews();
   const filtered = articles.filter(
-    (a) => !a.isMarketWatch && a.category === category,
+    (a) => !a.isMarketWatch && matchValues.includes(a.category),
   );
 
   return (
