@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostBySlug } from "@/lib/fetch-orange-news";
+import { fetchOrangeNews } from "@/lib/fetch-orange-news";
+import { ArticleNavigation } from "@/components/articles/ArticleNavigation";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -8,9 +9,18 @@ interface PageProps {
 
 export default async function ArticlePage({ params }: PageProps) {
   const { slug } = await params;
-  const article = await getPostBySlug(slug);
+  const { articles } = await fetchOrangeNews();
+  const article = articles.find((a) => a.slug === slug);
 
   if (!article) notFound();
+
+  // Build navigation list — same order as homepage (news only, score desc)
+  const navList = articles
+    .filter((a) => !a.isMarketWatch)
+    .sort((a, b) => b.score - a.score);
+  const idx = navList.findIndex((a) => a.slug === slug);
+  const prev = idx > 0 ? navList[idx - 1] : null;
+  const next = idx >= 0 && idx < navList.length - 1 ? navList[idx + 1] : null;
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-8 md:py-12">
@@ -62,6 +72,8 @@ export default async function ArticlePage({ params }: PageProps) {
           </a>
         </div>
       )}
+
+      <ArticleNavigation prev={prev} next={next} />
     </article>
   );
 }
