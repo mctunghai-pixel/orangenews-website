@@ -36,7 +36,14 @@ const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Orange News — Монгол Улсын санхүүгийн сэтгүүлч",
   description:
     "Bloomberg-ийг санагдуулам монгол санхүү, технологи, эдийн засгийн редакцлагдсан урсгал. Автомат pipeline-ээр шинэчлэгдэнэ.",
@@ -47,6 +54,9 @@ export const metadata: Metadata = {
     locale: "mn_MN",
     type: "website",
     siteName: "Orange News",
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 
