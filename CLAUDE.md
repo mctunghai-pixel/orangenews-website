@@ -2,7 +2,7 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 4 — IN PROGRESS (Step 2/3, ~90%)
+## Current phase: Phase 4 — COMPLETE ✅ (100%)
 
 | Step | Commit | Description |
 |---|---|---|
@@ -13,11 +13,15 @@
 | 2c | `2239f75` | `/markets/[ticker]` detail page (Hero + tabbed Chart + Stats grid) |
 | 2d-1 | `0b446c6` | Hero LineChart reuse + real SPX 30-day data wiring |
 | 2d-2 | `da1976c` | MNT/USD → USD/MNT (Bloomberg FX convention fix) |
-| 3 | _TBD_ | _scope to be defined_ |
+| 3.1 | `a76d81b` | tsconfig: exclude backups directory from TS compilation |
+| 3.2 | `e4a3294` | Article previous/next navigation |
+| 3.3 | `8797d06` | Footer enrichment with /markets/* links |
 
-Steps 1+2 production-verified on https://orangenews-website.vercel.app — see `test_phase4.txt` for regression endpoints.
+13 production commits (`b70e15e` through `8797d06`) plus typography polish (`4bc8a83`) + 2 docs commits (`83ebc9a`, `9ba7876`). All deployed to https://orangenews-website.vercel.app.
 
-**Pending manual test** (Step 1): Facebook Sharing Debugger — https://developers.facebook.com/tools/debug/ — verifies the Facebook scraper picks up the OG image. Target: `/articles/deepseek-v4-arrives-with-near-state-of-the-art-intelligence-1pucju`.
+**Pending external manual test** (Step 1): Facebook Sharing Debugger — https://developers.facebook.com/tools/debug/ — verifies the Facebook scraper picks up the OG image. Target: `/articles/deepseek-v4-arrives-with-near-state-of-the-art-intelligence-1pucju`.
+
+See `test_phase4.txt` for the regression endpoint list.
 
 ---
 
@@ -98,22 +102,56 @@ Steps 1+2 production-verified on https://orangenews-website.vercel.app — see `
 
 ---
 
-## Phase 4 — remaining
+## Architectural decisions (Phase 4 Step 3)
 
-- **Step 3** (TBD): scope undefined. Candidates from backlog:
-  - Search wiring (Header search button currently inert)
-  - Bookmark feature (localStorage + Header bookmark icon)
-  - Hostinger migration evaluation
-  - `tsconfig.json` exclude `backups/` (TS noise cleanup)
+### 1. Quick polish bundle — 3 atomic sub-tasks instead of 1 large feature
+- Step 3 packaged tsconfig hygiene + article navigation + footer enrichment as 3 small commits
+- Trade-off: 3 commit hashes in history vs. 1 large multi-file commit
+- **Wins**: independent revert capability per concern, clearer Conventional Commits semantics (`chore:` for tsconfig vs. `feat:` for navigation/footer), faster reviewer scan time
+- Pattern emerges as the "polish bundle" alternative to the bigger feature steps (Steps 1, 2)
 
-### Backlog (cross-step)
-- Vercel cron migration for `translated_posts.json` updates (Stage 2 backend pipeline)
-- Phase 5: migrate `CHART_TONES` to `globals.css` tokens
-- Phase 5: refactor `formatPrice(instrument)` to call `formatValue(price, asset)` (DRY)
-- Phase 5: ticker tagging on articles → related news on `/markets/[ticker]` detail page
-- Phase 5: 1D / 1Y timeframe tabs (requires backend intraday + 252-day depth)
+### 2. Article navigation order: score-desc (matches homepage display)
+- `ArticleNavigation.tsx` derives prev/next from same sorted list as homepage Hero/SecondaryArticles
+- Reading "next article" follows the same ranking the user just scrolled through — no semantic mismatch
+- Alternative considered (chronological by `publishedAt`) rejected: mock data has identical timestamps, would produce undefined ordering
+- Edge case: `isMarketWatch` articles return `idx === -1` from `findIndex()`, both prev+next become null, component renders nothing — graceful
 
-See `test_phase4.txt` for regression endpoint list.
+### 3. Single fetch via `fetchOrangeNews` (replaces `getPostBySlug` redundancy)
+- Article detail page now does 1 fetch + array `find/filter/sort`, not 2 (was implicit double-fetch via getPostBySlug → also calls fetchOrangeNews internally)
+- Same ISR cache slot serves the article + the navigation list
+- `getPostBySlug` helper retained in `fetch-orange-news.ts` for any future single-article callers, but page-level usage now direct
+
+### 4. Conditional `<Link>` vs `<a>` based on `href.startsWith("/")` (Footer)
+- Internal hrefs (`/markets/spx`) get Next.js `<Link>` — automatic prefetch on hover, client-side transition
+- External / stub hrefs (`#`, future `https://...`) use plain `<a>` — no prefetch overhead
+- Single render branch: `link.href.startsWith("/") ? <Link> : <a>` — minimal cognitive cost
+- Sets pattern for any future footer wiring (Phase 5 search/category links can adopt same shape)
+
+### 5. Footer grid: arbitrary 14-column to preserve brand width
+- Adding 5th nav column (Зах зээл) would have forced brand block to col-span-2 (≈233px) — too narrow for description + social icons
+- Solution: `lg:grid-cols-[repeat(14,minmax(0,1fr))]` arbitrary value — brand stays col-span-4 (≈400px), 5 nav cols at col-span-2 each (5 × 2 = 10), total 14
+- Tailwind v4 arbitrary-value support — no config changes, no design-system breakage
+- Trade-off: deviates from project's `lg:grid-cols-12` convention. Acceptable given the alternative was a cramped brand block.
+
+---
+
+## Phase 5 — backlog (not yet scoped into a phase)
+
+### User-facing features
+- Search functionality (Header search button currently inert)
+- Bookmark feature (localStorage + Header bookmark icon)
+- Related news on `/markets/[ticker]` (requires backend article→ticker tagging in `orange_translator.py`)
+- Individual stocks support: NVDA, AAPL, TSLA — requires API key (CoinGecko free tier doesn't cover equities)
+- Additional chart timeframes: 3M, 1Y (requires backend ≥252-day daily depth)
+
+### Infrastructure / migration
+- Hostinger → Vercel domain migration (set `NEXT_PUBLIC_SITE_URL=https://orangenews.mn` post-cutover)
+- Vercel cron migration for `translated_posts.json` updates (currently manual git push from automation repo)
+- Stage 2: real-time market data backend integration (`market_data.json` pipeline pushing to GitHub raw)
+
+### Code hygiene / refactor
+- Migrate `CHART_TONES` from hardcoded hex to `globals.css` design tokens (`--color-up`, `--color-down`)
+- Refactor `formatPrice(instrument)` to call `formatValue(price, asset)` (DRY internal logic)
 
 ---
 

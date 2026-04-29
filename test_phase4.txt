@@ -41,6 +41,29 @@ GET /                             → 200, Hero chart is 30-segment SPX wave (hi
                                     overlay text reads "S&P 500 · +0.42%" (live data, not hardcoded)
                                     inline ChartSvg removed — now uses shared LineChart from /charts/
 
+## Step 3.1 — tsconfig backups exclude (commit a76d81b)
+$ npx tsc --noEmit                → exit 0, NO backups/ noise in output
+
+## Step 3.2 — Article previous/next navigation (commit e4a3294)
+GET /articles/{slug-with-prev-next}  → 200, bottom shows "← Өмнөх нийтлэл" + "Дараагийн нийтлэл →"
+                                       both link to other articles, headlines as previews
+                                       hover: text turns accent orange
+GET /articles/{first-by-score}        → 200, only "Дараагийн →" visible (left side aria-hidden placeholder)
+GET /articles/{last-by-score}         → 200, only "← Өмнөх" visible (right side aria-hidden placeholder)
+GET /articles/{any-marketwatch}       → 200, no navigation section (idx === -1, returns null)
+Mobile (<768px)                       → nav stacks vertically (grid-cols-1)
+Desktop (>=768px)                     → side-by-side (md:grid-cols-2), next aligns right
+
+## Step 3.3 — Footer markets enrichment (commit 8797d06)
+GET /                             → 200, Footer shows 5 nav columns (was 4):
+                                    Сэдвүүд | Зах зээл (NEW) | Компани | Бүтээгдэхүүн | Хууль эрх зүй
+Footer "Зах зээл" links:
+  - "S&P 500"  → /markets/spx     (Next.js Link, prefetched)
+  - "Bitcoin"  → /markets/btc     (Next.js Link, prefetched)
+  - "USD/MNT"  → /markets/mntusd  (Next.js Link, prefetched)
+  - "Алт"      → /markets/xau     (Next.js Link, prefetched)
+Other footer columns                  → still href="#" stubs (no scope change)
+
 ## Cross-step regression
 GET /                             → 200, BreakingStrip + Hero + Secondary + ArticleFeed all render
 GET /articles/{slug}              → 200, body line-height 1.8 (Phase 4 typography polish)
