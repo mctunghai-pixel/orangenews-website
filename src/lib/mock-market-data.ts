@@ -113,8 +113,8 @@ export const MOCK_MARKET_DATA: Record<TickerSlug, MarketInstrument> = {
   },
   mntusd: {
     slug: "mntusd",
-    symbol: "MNT/USD",
-    name: "Mongolian Tugrik",
+    symbol: "USD/MNT",
+    name: "АНУ-ын доллар Монгол төгрөгөөр",
     asset: "fx",
     price: 3475.0,
     change: -2.78,

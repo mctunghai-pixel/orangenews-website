@@ -14,7 +14,7 @@ export const TICKER_SLUG_MAP = {
   ixic:   { display: "NASDAQ",  name: "Nasdaq Composite",   asset: "index" },
   btc:    { display: "BTC",     name: "Bitcoin",            asset: "crypto" },
   eth:    { display: "ETH",     name: "Ethereum",           asset: "crypto" },
-  mntusd: { display: "MNT/USD", name: "Mongolian Tugrik",   asset: "fx" },
+  mntusd: { display: "USD/MNT", name: "АНУ-ын доллар Монгол төгрөгөөр", asset: "fx" },
   xau:    { display: "GOLD",    name: "Gold",               asset: "commodity" },
   cl:     { display: "OIL WTI", name: "Crude Oil WTI",      asset: "commodity" },
 } as const satisfies Record<
