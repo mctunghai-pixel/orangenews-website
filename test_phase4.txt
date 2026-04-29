@@ -62,7 +62,82 @@ Footer "Зах зээл" links:
   - "Bitcoin"  → /markets/btc     (Next.js Link, prefetched)
   - "USD/MNT"  → /markets/mntusd  (Next.js Link, prefetched)
   - "Алт"      → /markets/xau     (Next.js Link, prefetched)
-Other footer columns                  → still href="#" stubs (no scope change)
+Other footer columns                  → still href="#" stubs (post-Step 3, pre-Step 4)
+
+## Step 4.1 — Categories footer wire (commit 90f783c)
+Footer "Сэдвүүд" links now navigate (was "#"):
+  - Санхүү       → /category/finance
+  - Технологи    → /category/tech
+  - Эдийн засаг  → /category/economy
+  - Крипто       → /category/crypto
+  - Монгол       → /category/mongolia
+  - Санал бодол  → /category/opinion
+
+## Step 4.2 — Company pages + ComingSoon (commit bfee925)
+GET /about                        → 200, "Бидний тухай" H1, vision + technology section
+                                    (Bloomberg comparison removed for trademark safety)
+GET /team                         → 200, "Редакцийн баг", 4 редакцийн зарчмууд bullet list
+                                    Bloomberg/Reuters reference KEPT (industry standard)
+GET /partnership                  → 200, "Хамтран ажиллах", 3 collaboration tracks
+                                    info@orangenews.mn CTA
+GET /careers                      → 200, ComingSoon component, "Тун удахгүй" badge
+GET /contact                      → 200, "Холбоо барих", email + 3 socials (FB/IG/Threads)
+                                    + редакц + хамтын ажиллагаа sections
+
+## Step 4.3 — Legal pages (commit 8dcaa43)
+GET /legal/terms                  → 200, "Үйлчилгээний нөхцөл", 5 sections
+                                    (general, IP, financial disclaimer, user duties, changes)
+                                    Effective date: 2026 оны 4 сарын 30
+GET /legal/privacy                → 200, "Нууцлалын бодлого", 5 sections
+                                    (data collection, usage, 3rd-party, security, contact)
+GET /legal/cookies                → 200, "Cookie бодлого", 4 sections
+                                    (essential / analytical / functional / management)
+GET /legal/data-sources           → 200, "Мэдээллийн эх сурвалж", 4 external links
+                                    (Bloomberg / Reuters / CoinDesk / Binance) — KEPT
+                                    target="_blank" rel="noopener noreferrer"
+GET /legal/impressum              → 200, "Импрессум", custom layout with hosting info,
+                                    pending registration disclosure, info@orangenews.mn
+
+## Step 4.4 — Product pages (commit f975426)
+GET /newsletter                   → 200, "Orange News Товхимол", marketing + disabled signup
+                                    Note: typo "Onolch" fixed → "Онцлох" (Cyrillic)
+GET /rss                          → 200, "RSS Feed", explanatory + feed URL display + open button
+GET /podcast                      → 200, ComingSoon component
+GET /app                          → 200, ComingSoon component
+GET /api-docs                     → 200, "Developer API", marketing + 4 endpoint features
+                                    + disabled early-access signup form
+
+## Step 4.5 — RSS route + Footer final wire (commit 7e87c1e)
+GET /rss.xml                      → 200, application/rss+xml; charset=utf-8
+                                    Cache-Control: public, max-age=3600
+                                    XML structure: <rss version="2.0" xmlns:atom>
+                                      <channel>
+                                        <title>Orange News</title>
+                                        <link>https://orangenews-website.vercel.app</link>
+                                        <description>Bloomberg-style Mongolian financial news</description>
+                                        <language>mn</language>
+                                        <lastBuildDate>RFC 822</lastBuildDate>
+                                        <atom:link rel="self">
+                                        <item> × 20 (top score, news-only)
+                                          <title>CDATA-wrapped Cyrillic
+                                          <link>full URL
+                                          <guid isPermaLink="true">
+                                          <description>CDATA, 300-char truncated
+                                          <category>CDATA Cyrillic
+                                          <pubDate>RFC 822
+                                      </channel>
+                                    </rss>
+
+GET /                             → 200, Footer all 26 links navigate (was mostly "#"):
+                                    Сэдвүүд (6 → /category/...) — wired in 4.1
+                                    Зах зээл (4 → /markets/...) — wired in Step 3.3
+                                    Компани (5 → /about, /team, etc.)
+                                    Бүтээгдэхүүн (5 → /newsletter, /rss, etc.)
+                                    Хууль эрх зүй (5 → /legal/*) — was 4, +Эх сурвалж
+                                    socialLinks: FB/IG real URLs + Threads (was "Вэбсайт" stub)
+                                    Brand <a> → <Link> (Next prefetch)
+                                    Spelling fix: "Редакцын" → "Редакцийн"
+                                    "Impressum" → "Импрессум" (Cyrillicized)
 
 ## Cross-step regression
 GET /                             → 200, BreakingStrip + Hero + Secondary + ArticleFeed all render

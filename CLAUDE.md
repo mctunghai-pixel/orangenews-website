@@ -2,7 +2,7 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 4 — COMPLETE ✅ (100%)
+## Current phase: Phase 4 — TRULY COMPLETE ✅ (100%, all 4 steps shipped)
 
 | Step | Commit | Description |
 |---|---|---|
@@ -16,10 +16,15 @@
 | 3.1 | `a76d81b` | tsconfig: exclude backups directory from TS compilation |
 | 3.2 | `e4a3294` | Article previous/next navigation |
 | 3.3 | `8797d06` | Footer enrichment with /markets/* links |
+| 4.1 | `90f783c` | Wire categories footer to `/category/{slug}` routes |
+| 4.2 | `bfee925` | ComingSoon component + 5 company pages (about/team/partnership/careers/contact) |
+| 4.3 | `8dcaa43` | LegalPageLayout + 5 legal pages (terms/privacy/cookies/data-sources/impressum) |
+| 4.4 | `f975426` | 5 product pages (newsletter/rss/podcast/app/api-docs) |
+| 4.5 | `7e87c1e` | RSS feed route + footer final wire (all 20+ hrefs) |
 
-13 production commits (`b70e15e` through `8797d06`) plus typography polish (`4bc8a83`) + 2 docs commits (`83ebc9a`, `9ba7876`). All deployed to https://orangenews-website.vercel.app.
+20 production commits + 1 polish + 3 docs. All deployed to https://orangenews-website.vercel.app.
 
-**Pending external manual test** (Step 1): Facebook Sharing Debugger — https://developers.facebook.com/tools/debug/ — verifies the Facebook scraper picks up the OG image. Target: `/articles/deepseek-v4-arrives-with-near-state-of-the-art-intelligence-1pucju`.
+**Pending external manual test** (Step 1): Facebook Sharing Debugger — https://developers.facebook.com/tools/debug/ — verifies the Facebook scraper picks up the OG image.
 
 See `test_phase4.txt` for the regression endpoint list.
 
@@ -135,9 +140,55 @@ See `test_phase4.txt` for the regression endpoint list.
 
 ---
 
+## Architectural decisions (Phase 4 Step 4)
+
+### 1. `LegalPageLayout` extraction — 4-of-5 reuse pattern
+- 4 legal pages share H1 + effective date + intro + structured body chrome
+- Extracted to `src/components/legal/LegalPageLayout.tsx` (~63 lines)
+- Body uses Tailwind descendant selectors (`[&_h2]:`, `[&_p]:`, etc.) — pages emit minimal markup, layout handles typography
+- `/legal/impressum` opted out — has section-by-section "process pending" disclosure that doesn't fit the schema; uses direct JSX
+
+### 2. `ComingSoon` shared component at `src/components/shared/`
+- 3 routes use it: `/careers` (Компани), `/podcast` + `/app` (Бүтээгдэхүүн)
+- Centered max-w-2xl layout, "Тун удахгүй" badge, title + description + email CTA
+- Path chosen: `shared/` (not `legal/`) — used across multiple feature areas, generic UI primitive
+- Single source of truth for "page exists, feature not yet" state — change all 3 by editing 1 component
+
+### 3. RSS 2.0 feed at `/rss.xml` (Next.js Route Handler)
+- Top 20 articles, score-desc, news-only filter (matches homepage)
+- **CDATA-wrapped Cyrillic** content (title, description, category) — XML-safe handling of `< > & ' "` and Mongolian text
+- RFC 822 pubDate + lastBuildDate via `Date.toUTCString()`
+- `<atom:link rel="self">` for feed self-discovery (RSS aggregators look for it)
+- 300-char word-boundary description truncation with ellipsis
+- ISR `revalidate = 3600` + explicit `Cache-Control: max-age=3600, s-maxage=3600`
+- `Content-Type: application/rss+xml; charset=utf-8` header
+
+### 4. Trademark-safe brand positioning (`/about` page)
+- Removed direct "Bloomberg comparison" wording from vision statement
+- Replaced with "Mongolian-first anchor" phrasing: "Монгол хэлээр санхүүгийн дэлхийн жишигт нийцсэн чанартай мэдээллийг хүргэх анхдагч платформ"
+- Bloomberg/Reuters references **kept** in `/team` ("Bloomberg, Reuters стандартад нийцсэн редакцийн дүрэм" — industry standard) and `/legal/data-sources` (legitimate source attribution with external link)
+- Pattern: distinguish brand mimicry (avoid) from industry standards reference (acceptable)
+
+### 5. Footer split-commit strategy (4-1 + 4-5)
+- Commit 4-1 wired only Сэдвүүд (categories) at start of Step 4
+- Commits 4-2/4-3/4-4 created pages without touching Footer
+- Commit 4-5 wired remaining 14 links once all destination pages existed
+- **Wins**: each commit can be reverted independently; categories work immediately while company/legal/products pages are still being built
+- Implementation: `git restore` to revert Footer to HEAD, apply Сэдвүүд-only edit, commit; then write fully-wired version for later commit
+
+### 6. Disabled signup forms with explicit "Тун удахгүй" labeling
+- `/newsletter` and `/api-docs` ship with full marketing content + a visible-but-disabled signup form
+- Pattern: `<input disabled aria-disabled>` + `<button disabled title="Тун удахгүй">` + `<p>Тун удахгүй</p>` micro-label below
+- Honest UX: shows the future shape without false promises; CTA email link `info@orangenews.mn` provides the working alternative
+- Better than ComingSoon for these routes because the marketing content (features, technology) is ready even if the signup pipeline is not
+
+---
+
 ## Phase 5 — backlog (not yet scoped into a phase)
 
 ### User-facing features
+- Newsletter signup wiring (replace disabled form with real subscribe endpoint)
+- Developer API access form wiring (replace disabled form with real waitlist)
 - Search functionality (Header search button currently inert)
 - Bookmark feature (localStorage + Header bookmark icon)
 - Related news on `/markets/[ticker]` (requires backend article→ticker tagging in `orange_translator.py`)
@@ -148,10 +199,12 @@ See `test_phase4.txt` for the regression endpoint list.
 - Hostinger → Vercel domain migration (set `NEXT_PUBLIC_SITE_URL=https://orangenews.mn` post-cutover)
 - Vercel cron migration for `translated_posts.json` updates (currently manual git push from automation repo)
 - Stage 2: real-time market data backend integration (`market_data.json` pipeline pushing to GitHub raw)
+- Legal entity registration → fill in `/legal/impressum` placeholder
 
 ### Code hygiene / refactor
 - Migrate `CHART_TONES` from hardcoded hex to `globals.css` design tokens (`--color-up`, `--color-down`)
 - Refactor `formatPrice(instrument)` to call `formatValue(price, asset)` (DRY internal logic)
+- Consider extracting `InfoPageLayout` if more company/product pages are added (currently per-page direct JSX is acceptable)
 
 ---
 
