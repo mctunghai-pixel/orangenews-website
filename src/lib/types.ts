@@ -87,11 +87,46 @@ export interface Article {
 }
 
 // -----------------------------------------------------------------------------
-// 3. Fetcher response types
+// 3. Article fetcher response
 // -----------------------------------------------------------------------------
 
 export interface FetchOrangeNewsResult {
   articles: Article[];
+  source: "live" | "mock";
+  fetchedAt: Date;
+  error?: string;
+}
+
+// -----------------------------------------------------------------------------
+// 4. Market data types — for /markets/[ticker] routes + TickerBar
+// -----------------------------------------------------------------------------
+
+export type AssetClass = "index" | "crypto" | "fx" | "commodity";
+
+/** Single market instrument — keyed by canonical lowercase slug */
+export interface MarketInstrument {
+  slug: string;        // URL-safe: "spx", "btc", "mntusd"
+  symbol: string;      // Display: "S&P 500", "BTC", "MNT/USD"
+  name: string;        // Long form: "S&P 500 Index", "Bitcoin"
+  asset: AssetClass;
+  price: number;       // Current price
+  change: number;      // Absolute change today
+  changePct: number;   // Percent change today
+  history1w: number[]; // 7 closes (oldest first, most recent last)
+  history1m: number[]; // 30 closes
+  // Optional stats — populated when known, undefined otherwise
+  high52w?: number;
+  low52w?: number;
+  dayHigh?: number;
+  dayLow?: number;
+  prevClose?: number;
+  volume24h?: number;  // crypto/stock specific
+  marketCap?: number;  // crypto specific
+  lastUpdated?: string; // ISO 8601 timestamp — when backend pushed this snapshot
+}
+
+export interface MarketDataResult {
+  instruments: Record<string, MarketInstrument>; // keyed by slug
   source: "live" | "mock";
   fetchedAt: Date;
   error?: string;
