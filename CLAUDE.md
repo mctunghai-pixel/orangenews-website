@@ -258,34 +258,108 @@ See `test_phase5.txt` for the regression endpoint list.
 
 ---
 
-## Phase 6 — Backlog (not yet scoped)
+## Phase 6 — Backlog (DETAILED SCOPE)
 
-### User-facing features
+Phase 6 emphasis: **Mongolian-first content depth + domestic equities**. The Phase 5 pipeline brought global market data to parity with Bloomberg-style coverage; Phase 6 builds the home-market story (MSE, mining, FDI) that justifies the "Mongolian-first anchor" positioning from `/about`.
+
+### Phase 6.1: Mongolian content expansion (~2 hours)
+**Priority: HIGH** — immediate user value, no API research needed, mostly backend.
+
+**Backend** (`orange-news-automation` repo):
+- Add Mongolian RSS feeds to `orange_rss_collector.py`:
+  - Montsame (state news agency): `https://montsame.mn/rss` — verify endpoint live
+  - Mongolbank: research RSS availability (may need scrape fallback)
+  - iKon.mn, Gogo.mn, news.mn — business / economy sections specifically
+  - Mining sector: targeted feeds (gogo.mn/business, mining-specific outlets)
+  - Foreign investment news sources (FDI focus)
+- Topic quota update: Mongolia 2–3 posts/day (currently 1)
+- Source attribution preserved in `orange_translator.py` (don't overwrite original byline)
+- Test new feeds against `classify_topic()` to confirm they land in Mongolia category, not Other
+
+**Frontend** (this repo):
+- Verify `/category/mongol` renders new articles (no code change expected if backend pipeline works)
+- Optional: `featured: true` flag in article schema → Header pinned banner for high-priority Mongolia content
+
+**Acceptance:** `/category/mongol` shows 5+ fresh Mongolian articles per day, mix of state news + business + mining.
+
+### Phase 6.2: MSE stocks section (~3–4 hours, research-dependent)
+**Priority: MEDIUM** — high user value but blocked on data-source feasibility.
+
+**Research phase** (do this first — gates the rest):
+- MSE public API availability check (`mse.mn` developer docs)
+- Alternatives: web scraping (parser fragility risk), licensed broker API (cost), partnership outreach
+- Decision tree: API → live integration; scrape → daily snapshot; no source → TradingView widget embed as MVP
+
+**Top MSE companies to include** (initial set):
+- Erdenes Tavan Tolgoi (ETT)
+- Oyu Tolgoi (OT)
+- APU
+- MIK Holding
+- Suu
+- Khan Bank, Trade and Development Bank (TDB)
+
+**Frontend:**
+- New route: `/stocks/mongolia` (list view)
+  - Stock listing: name, price, change %, volume
+  - Live prices via `mongolia_stocks` payload (Phase 6.2 backend) OR TradingView embed fallback
+  - Per-stock detail: `/stocks/mongolia/[ticker]` with hero + chart + stats grid (mirror existing `/markets/[ticker]` pattern for consistency)
+- Header navigation: add "Хувьцаа" tab (between "Зах зээл" and "Market Watch", or replace one of the lower-priority items)
+- Footer: new "Хувьцаа" section with top 5 stocks linking to `/stocks/mongolia/[ticker]`
+- Homepage `MarketSnapshot` "Монгол" quadrant: replace 2 stubs (MSE TOP-20, Оюу Толгой) with live entries from `mongolia_stocks` — 4th followup of MarketSnapshot to retire the last 2 stubs
+
+**Backend** (only if MSE API or scrape lane confirmed):
+- Extend `market_data.json` with `mongolia_stocks` section: `{ ott: {...}, ot: {...}, apu: {...}, ... }` matching `MarketInstrument` schema (with `assetClass: "equity"` — new asset class)
+- Frontend: extend `AssetClass` type with `"equity"`, no `$` prefix in `formatPrice()` (₮ suffix instead — new helper or branch)
+- Add to GHA cron pipeline (same `*/30` cadence)
+- Document API source + cost in `orange-news-automation` README
+
+**Acceptance:** `/stocks/mongolia` lists 6+ MSE companies with current price + change %. Header tab navigates correctly. Detail page renders for at least 1 ticker.
+
+### Phase 6.3: Mining + foreign investment focus (~1 hour)
+**Priority: LOW** — content tagging refinement.
+
+**Backend:**
+- Topic tagging extension: "Уул уурхай" (mining) as recognized subcategory in `classify_topic()`
+- "Гадаад хөрөнгө оруулалт" (FDI) tag
+- Classification logic: keyword + source-domain combined heuristic (mining-domain article + mining keywords → high confidence)
+
+**Frontend:**
+- Decision: dedicated `/category/mining` route OR tag-filter UI on `/category/mongol` page
+- If dedicated: add to `CATEGORY_SLUG_MAP` + `CATEGORY_ALIASES`, mirror existing pattern from Phase 5.1 AI alias
+- If filter UI: chip-row component above article feed, query-string driven
+
+**Acceptance:** Mining + FDI articles surfaceable as a distinct stream, either via URL or filter.
+
+### Phase 6.4: Existing deferred items (carry-over from prior backlogs)
+
+**User-facing features:**
 - Search functionality (Header search button currently inert)
 - Bookmark feature (localStorage + Header bookmark icon)
 - Article ticker tagging → related news on `/markets/[ticker]`
-- Individual stocks support: NVDA, AAPL, TSLA
-- Additional chart timeframes: 3M, 1Y
+- Individual US stocks: NVDA, AAPL, TSLA (requires paid API — CoinGecko free tier doesn't cover equities)
+- Additional chart timeframes: 3M, 1Y (requires backend ≥252-day daily depth)
 - Live news feed widget on `/market-watch`
 
-### Infrastructure / migration
-- Hostinger → orangenews.mn domain migration
-- Cancel Hostinger subscription
-- Vercel cron for `translated_posts.json`
-- Real Impressum business registration details
+**Infrastructure / migration:**
+- Hostinger → orangenews.mn domain migration (set `NEXT_PUBLIC_SITE_URL` post-cutover)
+- Cancel Hostinger subscription post-migration
+- Vercel cron for `translated_posts.json` (currently manual git push from automation repo)
+- Real Impressum business registration details (post legal entity registration)
 - Real address + phone for Contact page
-- Newsletter Mailchimp integration
+- Newsletter Mailchimp integration (replace disabled signup form)
 
-### Channel expansion
+**Channel expansion:**
 - Mobile app (iOS / Android)
 - Podcast platform integration
 
-### Code hygiene / refactor
-- `CHART_TONES` → `globals.css` design tokens
-- `formatPrice` DRY refactor
-- Component testing setup
+**Code hygiene / refactor:**
+- `CHART_TONES` → `globals.css` design tokens (`--color-up`, `--color-down`)
+- `formatPrice` DRY refactor (call `formatValue()` internally)
+- Remove `markets` export from `mock-data.ts` (already `@deprecated` since Phase 5.followup-1)
+- Component testing setup (Vitest + Testing Library)
 - Lighthouse performance audit
 - Accessibility (WCAG AA) audit
+- Backend canonicalization: rename `assetClass` → `asset`, `"forex"` → `"fx"`, history shape → `number[]` in `orange-news-automation` so the frontend normalizer (Phase 5.followup-2) can be retired
 
 ---
 
