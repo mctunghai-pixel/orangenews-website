@@ -83,7 +83,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-3 max-w-sm font-serif-body text-[13px] leading-relaxed text-muted">
-              Bloomberg-ийг санагдуулам монгол санхүү, эдийн засгийн редакцлагдсан урсгал. Автомат pipeline-д тулгуурласан шинэчлэлт.
+              Монгол хэлээр санхүү, эдийн засгийн дэлхийн жишигт нийцсэн чанартай мэдээллийг хүргэх анхдагч платформ. Автомат pipeline-д тулгуурласан.
             </p>
             <div className="mt-5 flex items-center gap-2">
               {socialLinks.map((s) => (
