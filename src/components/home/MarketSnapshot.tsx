@@ -1,8 +1,12 @@
 // Homepage 4-quadrant market overview. Distinct from /market-watch route
 // (Phase 5.2 daily briefing). 8/12 cells live via Phase 5.3 pipeline; 4 cells
-// (SOL, MSE TOP-20, Оюу Толгой, Зэс) ship as italic-muted stubs with mock
-// price + change % — visual cue (italic) signals "not live" without sacrificing
-// info density (full numbers, green/red preserved on change %).
+// (SOL, MSE TOP-20, Оюу Толгой, Зэс) render with hardcoded mock data.
+//
+// Visual harmony principle: stub cells render visually identical to live cells
+// — same font, same weight, same color semantics on change %. The only
+// differentiation is a subtle `opacity-90` on the row + a tooltip on hover
+// (developer-level signal). Bloomberg pattern: visual consistency over
+// data-source transparency.
 
 import type { MarketInstrument } from "@/lib/types";
 import {
@@ -137,7 +141,10 @@ export function MarketSnapshot({
               {cat.cells.map((cell) => (
                 <li
                   key={cell.label}
-                  className="flex items-center justify-between gap-2"
+                  className={`flex items-center justify-between gap-2 ${
+                    cell.kind === "stub" ? "opacity-90" : ""
+                  }`}
+                  {...(cell.kind === "stub" ? { title: STUB_TOOLTIP } : {})}
                 >
                   {cell.kind === "live" ? (
                     <LiveRow label={cell.label} instrument={cell.instrument} />
@@ -218,17 +225,11 @@ function StubRow({
   const up = changePct !== null && changePct >= 0;
   return (
     <>
-      <span
-        className="truncate font-sans text-[12px] md:text-[13px] font-medium italic text-muted/80"
-        title={STUB_TOOLTIP}
-      >
+      <span className="truncate font-sans text-[12px] md:text-[13px] font-medium text-foreground">
         {label}
       </span>
-      <div
-        className="flex shrink-0 items-center gap-2"
-        title={STUB_TOOLTIP}
-      >
-        <span className="font-mono text-[11px] md:text-[12px] tabular-nums italic text-muted/80">
+      <div className="flex shrink-0 items-center gap-2">
+        <span className="font-mono text-[11px] md:text-[12px] text-foreground tabular-nums">
           {price}
         </span>
         {changePct === null ? (
@@ -240,7 +241,7 @@ function StubRow({
           </span>
         ) : (
           <span
-            className={`w-14 text-right font-mono text-[10px] md:text-[11px] tabular-nums italic ${
+            className={`w-14 text-right font-mono text-[10px] md:text-[11px] tabular-nums ${
               up ? "text-up" : "text-down"
             }`}
           >
