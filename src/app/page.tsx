@@ -1,7 +1,7 @@
 import { BreakingStrip } from "@/components/home/BreakingStrip";
 import { Hero } from "@/components/home/Hero";
 import { SecondaryArticles } from "@/components/home/SecondaryArticles";
-import { MarketWatch } from "@/components/home/MarketWatch";
+import { MarketSnapshot } from "@/components/home/MarketSnapshot";
 import { ArticleFeed } from "@/components/home/ArticleFeed";
 import { MostRead } from "@/components/home/MostRead";
 import { Newsletter } from "@/components/home/Newsletter";
@@ -47,7 +47,7 @@ export default async function Home() {
           className="mt-10 animate-fade-up md:mt-12"
           style={{ animationDelay: "0.15s", animationFillMode: "both" }}
         >
-          <MarketWatch />
+          <MarketSnapshot instruments={instruments} />
         </div>
 
         <div

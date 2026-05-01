@@ -217,6 +217,7 @@ export const mostRead: string[] = [
   "Bitcoin халалтыг хэрхэн тайлбарлах вэ — гурван үзүүлэлт",
 ];
 
+/** @deprecated Replaced by live `instruments` in MarketSnapshot (Phase 5 followup). Remove in Phase 6. */
 export const markets: MarketCategory[] = [
   {
     title: "Индексүүд",
