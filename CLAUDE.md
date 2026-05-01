@@ -2,7 +2,13 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 4 — TRULY COMPLETE ✅ (100%, all 4 steps shipped)
+## Current phase: Phase 5 — COMPLETE ✅ (100%, cross-repo: frontend + backend pipeline)
+
+See `Phase 5 — COMPLETE` section below. Phase 4 retained as reference.
+
+---
+
+## Phase 4 — TRULY COMPLETE ✅ (100%, all 4 steps shipped)
 
 | Step | Commit | Description |
 |---|---|---|
@@ -184,27 +190,102 @@ See `test_phase4.txt` for the regression endpoint list.
 
 ---
 
-## Phase 5 — backlog (not yet scoped into a phase)
+## Phase 5 — COMPLETE ✅ (100%)
+
+| Step | Commit | Description |
+|---|---|---|
+| 5.1 | `bd8ff68` | AI articles in Технологи category alias |
+| 5.2-1 | `820b2a4` | Market Watch data layer + `getMarketWatch` helper |
+| 5.2-2 | `886d77a` | `/market-watch` route + Header pulse-dot navigation |
+| brand | `dd0f4f1` | Footer tagline alignment with brand-independent positioning |
+| 5.3-1 | `9823686` (backend) | JSON writer matching frontend schema (orange-news-automation) |
+| 5.3-2 | `fa214a1` (backend) | GitHub Actions cron for `market_data.json` |
+| 5.3-data | `4dce6c7` (backend) | First GHA bot auto-commit (verified) |
+| 5.followup | `10d3e8f` | MarketSnapshot homepage section live-data wire (rename + 8 cells live, 4 honest stubs) |
+
+Cross-repo phase: 5 frontend commits + 3 backend commits. Backend lives in `orange-news-automation` repo. Real-time market data pipeline now active at `$0/month`.
+
+See `test_phase5.txt` for the regression endpoint list.
+
+---
+
+## Architectural decisions (Phase 5)
+
+### Step 5.1: Category alias map
+- `"ТЕХНОЛОГИ" → ["ТЕХНОЛОГИ", "AI"]` in `CATEGORY_ALIASES`
+- Frontend filter logic uses `matchValues.includes()` to expand the category match set
+- Backend taxonomy unchanged (no `orange-news-automation` repo touched) — pure frontend mapping
+- `/category/ai` still functional for power-user URL access — both routes coexist
+- Bloomberg pattern: AI as Tech sub-category rather than separate top-level
+
+### Step 5.2: Market Watch website integration
+- URL: `/market-watch` — dedicated route, not a category alias
+- 3-signal Market Watch detection (mirrors `fb_poster_live.py` heuristic from automation repo)
+- Image hosting: GitHub raw URL with date-stamped filename
+- Smart fallback chain: `post_00_YYYYMMDD.png` → `market_watch_thumbnail.png`
+- Header navigation: leftmost prominent placement with pulse-dot animation
+- Mobile drawer: same prominent placement, first item with pulse-dot
+- Empty state copy: "Өнөөдрийн зах зээлийн өдрийн тойм тун удахгүй гарна"
+- Body source priority: `post_text` first (clean), `full_post` fallback
+- Forward compatibility: when daily images commit, primary URL wins automatically
+
+### Step 5.3: Real-time market data pipeline (cross-repo)
+- Backend repo: `orange-news-automation` (separate from frontend)
+- File: `market_data.json` at repo root (canonical filename)
+- Cron: `*/30 * * * *` — 30-min frequency (free-tier conservation)
+- Schema: exact match to `MarketInstrument` type — no transformation layer needed
+- Auto-commit pattern with `[skip ci]` tag to prevent CI loops
+- GHA bot identity for auto-commits (audit trail)
+- CDN cache: 5-min lag acceptable for non-trading-floor consumers
+- Frontend auto-promotion: mock fallback bypassed when `market_data.json` exists at raw URL
+- Free APIs only: yfinance + CoinGecko + Binance + Mongolbank ($0/month total)
+- `mntusd` via ExchangeRate-API (Mongolbank XML parse complexity vs free reliability tradeoff)
+
+### Brand consistency
+- "Mongolian Bloomberg" framing removed throughout site
+- `/about` + Footer + brand identity now use "анхдагч платформ" (pioneer positioning)
+- Trademark-safe brand independence — Bloomberg/Reuters references retained only as industry standards (`/team`, `/legal/data-sources`)
+
+### Followup: homepage MarketSnapshot wiring (`10d3e8f`)
+- Caught post-Phase-5.3: homepage "Зах зээлийн хараа" section still rendered hardcoded mock (SPX 5,247.18, BTC $68,420) while TickerBar + `/markets/[ticker]` flowed live data
+- File renamed: `src/components/home/MarketWatch.tsx` → `MarketSnapshot.tsx` to resolve naming collision with the Phase 5.2 `/market-watch` route — the homepage 4-quadrant grid is a *snapshot*, the route is the daily *briefing*
+- 8 of 12 cells wired to live `instruments` (passed through from `page.tsx` — zero extra fetch)
+- 4 cells without backend coverage (SOL, MSE TOP-20, Оюу Толгой, Зэс) ship as honest stubs: italic muted label + `≈` prefix + em-dash change + `title="Амьд өгөгдөл удахгүй идэвхжинэ"` tooltip
+- Discriminated-union `Cell = LiveCell | StubCell` → exhaustive render branches
+- Defensive: missing instrument auto-degrades to `≈ —` stub (no runtime crash if backend trims an instrument)
+- `markets` export in `mock-data.ts` flagged `@deprecated` for Phase 6 removal — kept in place to avoid mid-phase breaking removals
+- Pattern reuse: same "honest disabled state" approach as Phase 4.6 disabled signup forms — show what will exist, mark clearly that it isn't live yet
+
+---
+
+## Phase 6 — Backlog (not yet scoped)
 
 ### User-facing features
-- Newsletter signup wiring (replace disabled form with real subscribe endpoint)
-- Developer API access form wiring (replace disabled form with real waitlist)
 - Search functionality (Header search button currently inert)
 - Bookmark feature (localStorage + Header bookmark icon)
-- Related news on `/markets/[ticker]` (requires backend article→ticker tagging in `orange_translator.py`)
-- Individual stocks support: NVDA, AAPL, TSLA — requires API key (CoinGecko free tier doesn't cover equities)
-- Additional chart timeframes: 3M, 1Y (requires backend ≥252-day daily depth)
+- Article ticker tagging → related news on `/markets/[ticker]`
+- Individual stocks support: NVDA, AAPL, TSLA
+- Additional chart timeframes: 3M, 1Y
+- Live news feed widget on `/market-watch`
 
 ### Infrastructure / migration
-- Hostinger → Vercel domain migration (set `NEXT_PUBLIC_SITE_URL=https://orangenews.mn` post-cutover)
-- Vercel cron migration for `translated_posts.json` updates (currently manual git push from automation repo)
-- Stage 2: real-time market data backend integration (`market_data.json` pipeline pushing to GitHub raw)
-- Legal entity registration → fill in `/legal/impressum` placeholder
+- Hostinger → orangenews.mn domain migration
+- Cancel Hostinger subscription
+- Vercel cron for `translated_posts.json`
+- Real Impressum business registration details
+- Real address + phone for Contact page
+- Newsletter Mailchimp integration
+
+### Channel expansion
+- Mobile app (iOS / Android)
+- Podcast platform integration
 
 ### Code hygiene / refactor
-- Migrate `CHART_TONES` from hardcoded hex to `globals.css` design tokens (`--color-up`, `--color-down`)
-- Refactor `formatPrice(instrument)` to call `formatValue(price, asset)` (DRY internal logic)
-- Consider extracting `InfoPageLayout` if more company/product pages are added (currently per-page direct JSX is acceptable)
+- `CHART_TONES` → `globals.css` design tokens
+- `formatPrice` DRY refactor
+- Component testing setup
+- Lighthouse performance audit
+- Accessibility (WCAG AA) audit
 
 ---
 

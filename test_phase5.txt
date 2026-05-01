@@ -1,0 +1,109 @@
+# Phase 5 Regression Test Endpoints
+# Updated: 2026-05-01
+# Production: https://orangenews-website.vercel.app
+# Local:      http://localhost:3000
+#
+# Phase 4 endpoints remain valid — see test_phase4.txt for those.
+
+## Step 5.1 — Category alias (commit bd8ff68)
+GET /category/tech     → 200, shows ТЕХНОЛОГИ + AI articles (alias-expanded match set)
+GET /category/ai       → 200, shows AI subset only (power-user direct access)
+GET /category/finance  → 200, unchanged (no alias applied)
+
+## Step 5.2 — Market Watch route (commits 820b2a4, 886d77a)
+GET /market-watch                       → 200, real Market Watch from translated_posts.json[0]
+                                          date display, image, 4 emoji-rich sections
+                                          (post_text source preferred, full_post fallback)
+GET /market-watch (no MW data)          → 200, empty state:
+                                          "Өнөөдрийн зах зээлийн өдрийн тойм тун удахгүй гарна"
+
+Header (any page)                       → "Market Watch" leftmost item with pulse-dot animation
+Mobile drawer (any page)                → "Market Watch" first item with pulse-dot animation
+
+Image fallback chain (verify in browser DevTools network tab):
+  primary: post_00_YYYYMMDD.png    (date-stamped, when daily image committed)
+  fallback: market_watch_thumbnail.png
+
+## Step 5.3 — Real-time market data pipeline (backend: orange-news-automation)
+
+### Backend artifact
+GET https://raw.githubusercontent.com/mctunghai-pixel/orange-news-automation/main/market_data.json
+    → HTTP 200, valid JSON
+    → 8 instruments: spx, dji, ixic, btc, eth, mntusd, xau, cl
+    → Schema match: MarketInstrument type (frontend src/types/market.ts)
+    → lastUpdated within last 30 min
+    → Cron schedule on backend: */30 * * * * (every 30 min)
+
+### Frontend auto-promotion
+GET /markets/spx                        → real SPX (NOT 6,852.34 mock — real live value)
+GET /markets/btc                        → real BTC (NOT $68,420 mock — real live value)
+GET /markets/dji                        → real DOW
+GET /markets/ixic                       → real NASDAQ
+GET /markets/eth                        → real ETH
+GET /markets/mntusd                     → real USD/MNT (ExchangeRate-API)
+GET /markets/xau                        → real GOLD
+GET /markets/cl                         → real OIL WTI
+
+TickerBar (any page)                    → 8 instruments × real prices (mock bypassed)
+Hero chart (homepage)                   → real SPX 30-day trend (history1m from live data)
+
+## Step 5.followup — MarketSnapshot homepage section (commit 10d3e8f)
+GET /                                   → 200, homepage "Зах зээлийн хараа" section
+                                          (was MarketWatch.tsx, now MarketSnapshot.tsx)
+                                          shows REAL prices for 8 of 12 cells:
+                                            Индексүүд: S&P 500, NASDAQ, DOW (live)
+                                            Крипто:    BTC, ETH (live) + SOL (stub)
+                                            Монгол:    USD/MNT (live) + MSE TOP-20, Оюу Толгой (stubs)
+                                            Түүхий эд: Алт, OIL WTI (live) + Зэс (stub)
+                                          Live cells: real prices match TickerBar
+                                          Stub cells: italic muted label + "≈" prefix + em-dash for change %
+                                          Header timestamp: "Шинэчлэгдсэн · X минутын өмнө"
+                                          (derived from instruments[*].lastUpdated, not hardcoded "1 минутын өмнө")
+
+Hover (desktop) on any stub cell        → tooltip "Амьд өгөгдөл удахгүй идэвхжинэ"
+Component file                          → src/components/home/MarketSnapshot.tsx (renamed from MarketWatch.tsx)
+                                          NO naming collision with /market-watch route
+
+## Brand consistency (commit dd0f4f1)
+GET /                                   → 200, Footer brand description has NO
+                                          "Bloomberg-ийг санагдуулам" wording anywhere
+GET /about                              → 200, vision uses "анхдагч платформ" framing
+                                          (no "Mongolian Bloomberg" comparison)
+
+Verify retained references (legitimate industry-standard usage):
+  /team             → Bloomberg/Reuters mentioned as редакцийн стандарт
+  /legal/data-sources → Bloomberg/Reuters as external source attribution
+
+## Cross-step regression (Phase 5 should not break Phase 4)
+GET /                                   → 200, full homepage chrome
+GET /opengraph-image                    → 200, OG image still rendering
+GET /rss.xml                            → 200, RSS feed unchanged
+GET /articles/{any-slug}                → 200, prev/next nav still works
+GET /category/{any-slug}                → 200, all category routes still working
+
+## Manual visual checks (browser only)
+- Header desktop: "Market Watch" leftmost with orange pulse-dot, animation visible
+- Header mobile drawer: "Market Watch" first item, pulse-dot visible
+- /market-watch with data: 4 emoji-rich sections render, image loads
+- /market-watch empty state: centered "тун удахгүй" message
+- TickerBar prices change between visits (live data, not static mock)
+- Footer tagline: brand-independent positioning, alignment correct
+- Console: 0 errors, 0 hydration warnings
+
+## Curl snippet (Phase 5 endpoints)
+URLS=(
+  /
+  /market-watch
+  /category/tech
+  /category/ai
+  /category/finance
+  /markets/spx /markets/btc /markets/mntusd
+)
+for u in "${URLS[@]}"; do
+  printf "%-90s %s\n" "$u" "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000$u)"
+done
+
+## External backend check
+curl -s -o /dev/null -w '%{http_code}\n' \
+  https://raw.githubusercontent.com/mctunghai-pixel/orange-news-automation/main/market_data.json
+# Expected: 200
