@@ -36,33 +36,82 @@ GET https://raw.githubusercontent.com/mctunghai-pixel/orange-news-automation/mai
 
 ### Frontend auto-promotion
 GET /markets/spx                        → real SPX (NOT 6,852.34 mock — real live value)
-GET /markets/btc                        → real BTC (NOT $68,420 mock — real live value)
+GET /markets/btc                        → real BTC, $ prefix preserved (NOT $68,420 mock)
 GET /markets/dji                        → real DOW
 GET /markets/ixic                       → real NASDAQ
-GET /markets/eth                        → real ETH
+GET /markets/eth                        → real ETH, $ prefix preserved
 GET /markets/mntusd                     → real USD/MNT (ExchangeRate-API)
-GET /markets/xau                        → real GOLD
-GET /markets/cl                         → real OIL WTI
+                                          NOTE: changePct may be 0 (daily-resolution feed)
+GET /markets/xau                        → real GOLD, $ prefix preserved
+GET /markets/cl                         → real OIL WTI, $ prefix preserved
 
 TickerBar (any page)                    → 8 instruments × real prices (mock bypassed)
-Hero chart (homepage)                   → real SPX 30-day trend (history1m from live data)
+                                          $ prefix correct: BTC $X, ETH $X, GOLD $X, OIL WTI $X
+                                          (FX/indices: bare numbers)
 
-## Step 5.followup — MarketSnapshot homepage section (commit 10d3e8f)
-GET /                                   → 200, homepage "Зах зээлийн хараа" section
-                                          (was MarketWatch.tsx, now MarketSnapshot.tsx)
-                                          shows REAL prices for 8 of 12 cells:
-                                            Индексүүд: S&P 500, NASDAQ, DOW (live)
-                                            Крипто:    BTC, ETH (live) + SOL (stub)
-                                            Монгол:    USD/MNT (live) + MSE TOP-20, Оюу Толгой (stubs)
-                                            Түүхий эд: Алт, OIL WTI (live) + Зэс (stub)
-                                          Live cells: real prices match TickerBar
-                                          Stub cells: italic muted label + "≈" prefix + em-dash for change %
-                                          Header timestamp: "Шинэчлэгдсэн · X минутын өмнө"
-                                          (derived from instruments[*].lastUpdated, not hardcoded "1 минутын өмнө")
-
-Hover (desktop) on any stub cell        → tooltip "Амьд өгөгдөл удахгүй идэвхжинэ"
+## Step 5.followup-1 — MarketSnapshot rename + initial wire (commit 10d3e8f)
 Component file                          → src/components/home/MarketSnapshot.tsx (renamed from MarketWatch.tsx)
                                           NO naming collision with /market-watch route
+                                          History: git log --follow src/components/home/MarketSnapshot.tsx
+
+## Step 5.followup-2 — schema normalizer + format polish (commit TBD)
+
+### Hero chart visual regression (root-cause fix from this commit)
+GET /                                   → 200, Hero LineChart shows real SPX 30-day curve
+                                          NOT a flat line, NOT empty/blank SVG, NOT NaN-coordinate glitch
+                                          curve trends UP across 30 points (matches /markets/spx 1M chart shape)
+                                          overlay reads "S&P 500 · +X.XX%" (live changePct)
+                                          ROOT CAUSE (pre-fix): backend writes history1w/1m as
+                                          [{date, close}] objects but frontend type expected number[].
+                                          Math.min(...objects) = NaN → SVG path renders garbage.
+                                          FIX: flattenHistory() in fetch-market-data.ts normalizer.
+
+GET /markets/spx                        → 1W/1M chart curves render (no NaN glitches)
+GET /markets/btc                        → 1W/1M chart curves render
+GET /markets/cl                         → 1W/1M chart curves render
+                                          (i.e. all instruments — chart fix is universal)
+
+### MarketSnapshot homepage section format
+GET /                                   → 200, homepage "Зах зээлийн хараа" section:
+
+  Индексүүд:
+    S&P 500     <real>      <+X.XX%/-X.XX% colored>      ← bare number (no $)
+    NASDAQ      <real>      <colored change>
+    DOW         <real>      <colored change>
+
+  Крипто:
+    BTC         $<real>     <colored change>             ← $ prefix
+    ETH         $<real>     <colored change>             ← $ prefix
+    SOL         $174.22     -0.67% (red, italic)         ← stub: italic muted, color preserved
+
+  Монгол:
+    USD/MNT     <real>      <colored OR em-dash>         ← em-dash if changePct===0 && history1w<2
+                                                           (mntusd ExchangeRate-API daily resolution)
+    MSE TOP-20  38,421      +0.24% (green, italic)       ← stub: italic muted, color preserved
+    Оюу Толгой  4,120₮      +1.21% (green, italic)       ← stub: italic muted
+
+  Түүхий эд:
+    Алт         $<real>     <colored change>             ← $ prefix
+    OIL WTI     $<real>     <colored change>             ← $ prefix
+    Зэс         $4.18       +0.33% (green, italic)       ← stub: italic muted
+
+  Header timestamp: "Шинэчлэгдсэн · X минутын өмнө" (from instruments[*].lastUpdated)
+
+Hover (desktop) on any stub cell        → tooltip "Амьд өгөгдөл удахгүй идэвхжинэ"
+Stub visual signature                   → italic + text-muted/80 on label + price
+                                          change % keeps green/red color (info density preserved)
+                                          NO "≈" prefix anywhere
+
+### Schema normalizer behavior (fetch-market-data.ts)
+Backend payload (current orange-news-automation schema):
+  assetClass: "index" | "crypto" | "commodity" | "forex"  (frontend reads as `asset`)
+  history1w: [{date, close}, ...]                         (frontend reads as number[])
+
+Normalizer (normalizeBackendInstrument):
+  - Maps assetClass → asset (with "forex" → "fx" translation)
+  - Flattens history1w/1m: extracts .close from each point
+  - Idempotent: passes through canonical shape unchanged
+  - Returns null if required fields missing (logged via mock fallback)
 
 ## Brand consistency (commit dd0f4f1)
 GET /                                   → 200, Footer brand description has NO

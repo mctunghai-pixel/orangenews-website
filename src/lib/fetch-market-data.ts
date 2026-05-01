@@ -8,7 +8,7 @@
 // Stage 2 (future):  Pipeline pushes market_data.json → live data autopilot
 // =============================================================================
 
-import type { MarketDataResult, MarketInstrument } from "./types";
+import type { AssetClass, MarketDataResult, MarketInstrument } from "./types";
 import { MOCK_MARKET_DATA } from "./mock-market-data";
 import { isValidTickerSlug } from "./ticker-slug";
 
@@ -18,18 +18,85 @@ const MARKET_DATA_URL =
   process.env.MARKET_DATA_URL ??
   "https://raw.githubusercontent.com/mctunghai-pixel/orange-news-automation/main/market_data.json";
 
-/** Lightweight runtime validation — defends against schema drift */
-function isValidInstrument(v: unknown): v is MarketInstrument {
-  if (typeof v !== "object" || v === null) return false;
+const OPTIONAL_NUMBER_KEYS = [
+  "high52w",
+  "low52w",
+  "dayHigh",
+  "dayLow",
+  "prevClose",
+  "volume24h",
+  "marketCap",
+] as const satisfies readonly (keyof MarketInstrument)[];
+
+/** Resolve asset class from frontend (`asset`) or backend (`assetClass`) shape. */
+function resolveAsset(raw: Record<string, unknown>): AssetClass | null {
+  const candidate = (raw.asset ?? raw.assetClass) as unknown;
+  if (candidate === "index" || candidate === "crypto" || candidate === "commodity" || candidate === "fx") {
+    return candidate;
+  }
+  if (candidate === "forex") return "fx"; // backend uses "forex"; frontend canonical is "fx"
+  return null;
+}
+
+/** Flatten history shape: backend `[{date, close}]` → `number[]`; pass-through if already numeric. */
+function flattenHistory(h: unknown): number[] | null {
+  if (!Array.isArray(h)) return null;
+  if (h.length === 0) return [];
+  if (typeof h[0] === "number") return h.filter((n): n is number => typeof n === "number");
+  if (typeof h[0] === "object" && h[0] !== null && "close" in (h[0] as object)) {
+    return h
+      .map((p) => (p as { close: unknown }).close)
+      .filter((n): n is number => typeof n === "number");
+  }
+  return null;
+}
+
+/**
+ * Normalize a backend record into the frontend `MarketInstrument` shape.
+ * Tolerant of both backend (`assetClass` + `[{date,close}]` history) and
+ * canonical frontend (`asset` + `number[]` history) shapes — idempotent.
+ * Returns `null` if required fields are missing or malformed.
+ */
+function normalizeBackendInstrument(v: unknown): MarketInstrument | null {
+  if (typeof v !== "object" || v === null) return null;
   const o = v as Record<string, unknown>;
-  return (
-    typeof o.slug === "string" &&
-    typeof o.symbol === "string" &&
-    typeof o.price === "number" &&
-    typeof o.changePct === "number" &&
-    Array.isArray(o.history1w) &&
-    Array.isArray(o.history1m)
-  );
+
+  const asset = resolveAsset(o);
+  if (!asset) return null;
+
+  const history1w = flattenHistory(o.history1w);
+  const history1m = flattenHistory(o.history1m);
+  if (!history1w || !history1m) return null;
+
+  if (
+    typeof o.slug !== "string" ||
+    typeof o.symbol !== "string" ||
+    typeof o.name !== "string" ||
+    typeof o.price !== "number" ||
+    typeof o.change !== "number" ||
+    typeof o.changePct !== "number"
+  ) {
+    return null;
+  }
+
+  const out: MarketInstrument = {
+    slug: o.slug,
+    symbol: o.symbol,
+    name: o.name,
+    asset,
+    price: o.price,
+    change: o.change,
+    changePct: o.changePct,
+    history1w,
+    history1m,
+  };
+
+  for (const k of OPTIONAL_NUMBER_KEYS) {
+    if (typeof o[k] === "number") out[k] = o[k] as number;
+  }
+  if (typeof o.lastUpdated === "string") out.lastUpdated = o.lastUpdated;
+
+  return out;
 }
 
 /** Build mock fallback result with fresh `lastUpdated` timestamp on each instrument */
@@ -63,9 +130,9 @@ export async function fetchMarketData(): Promise<MarketDataResult> {
 
     const instruments: Record<string, MarketInstrument> = {};
     for (const [key, value] of Object.entries(raw)) {
-      if (isValidTickerSlug(key) && isValidInstrument(value)) {
-        instruments[key] = value;
-      }
+      if (!isValidTickerSlug(key)) continue;
+      const normalized = normalizeBackendInstrument(value);
+      if (normalized) instruments[key] = normalized;
     }
 
     if (Object.keys(instruments).length === 0) {

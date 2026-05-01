@@ -1,6 +1,8 @@
 // Homepage 4-quadrant market overview. Distinct from /market-watch route
 // (Phase 5.2 daily briefing). 8/12 cells live via Phase 5.3 pipeline; 4 cells
-// (SOL, MSE TOP-20, Оюу Толгой, Зэс) ship as honest "≈" stubs — no backend.
+// (SOL, MSE TOP-20, Оюу Толгой, Зэс) ship as italic-muted stubs with mock
+// price + change % — visual cue (italic) signals "not live" without sacrificing
+// info density (full numbers, green/red preserved on change %).
 
 import type { MarketInstrument } from "@/lib/types";
 import {
@@ -18,7 +20,10 @@ type LiveCell = {
 type StubCell = {
   kind: "stub";
   label: string;
-  approxValue: string;
+  /** Pre-formatted price string e.g. "$174.22", "38,421", "4,120₮" */
+  price: string;
+  /** Mock change %; null suppresses the change column (renders em-dash) */
+  changePct: number | null;
 };
 
 type Cell = LiveCell | StubCell;
@@ -43,42 +48,43 @@ function buildCategories(
   const live = (
     label: string,
     instrument: MarketInstrument | undefined,
+    fallback: { price: string; changePct: number | null },
   ): Cell =>
     instrument
       ? { kind: "live", label, instrument }
-      : { kind: "stub", label, approxValue: "—" };
+      : { kind: "stub", label, ...fallback };
 
   return [
     {
       title: "Индексүүд",
       cells: [
-        live("S&P 500", instruments.spx),
-        live("NASDAQ", instruments.ixic),
-        live("DOW", instruments.dji),
+        live("S&P 500", instruments.spx, { price: "—", changePct: null }),
+        live("NASDAQ", instruments.ixic, { price: "—", changePct: null }),
+        live("DOW", instruments.dji, { price: "—", changePct: null }),
       ],
     },
     {
       title: "Крипто",
       cells: [
-        live("BTC", instruments.btc),
-        live("ETH", instruments.eth),
-        { kind: "stub", label: "SOL", approxValue: "$174" },
+        live("BTC", instruments.btc, { price: "—", changePct: null }),
+        live("ETH", instruments.eth, { price: "—", changePct: null }),
+        { kind: "stub", label: "SOL", price: "$174.22", changePct: -0.67 },
       ],
     },
     {
       title: "Монгол",
       cells: [
-        live("USD/MNT", instruments.mntusd),
-        { kind: "stub", label: "MSE TOP-20", approxValue: "38,421" },
-        { kind: "stub", label: "Оюу Толгой", approxValue: "4,120₮" },
+        live("USD/MNT", instruments.mntusd, { price: "—", changePct: null }),
+        { kind: "stub", label: "MSE TOP-20", price: "38,421", changePct: 0.24 },
+        { kind: "stub", label: "Оюу Толгой", price: "4,120₮", changePct: 1.21 },
       ],
     },
     {
       title: "Түүхий эд",
       cells: [
-        live("Алт", instruments.xau),
-        live("OIL WTI", instruments.cl),
-        { kind: "stub", label: "Зэс", approxValue: "$4.18" },
+        live("Алт", instruments.xau, { price: "—", changePct: null }),
+        live("OIL WTI", instruments.cl, { price: "—", changePct: null }),
+        { kind: "stub", label: "Зэс", price: "$4.18", changePct: 0.33 },
       ],
     },
   ];
@@ -136,7 +142,11 @@ export function MarketSnapshot({
                   {cell.kind === "live" ? (
                     <LiveRow label={cell.label} instrument={cell.instrument} />
                   ) : (
-                    <StubRow label={cell.label} approxValue={cell.approxValue} />
+                    <StubRow
+                      label={cell.label}
+                      price={cell.price}
+                      changePct={cell.changePct}
+                    />
                   )}
                 </li>
               ))}
@@ -148,6 +158,15 @@ export function MarketSnapshot({
   );
 }
 
+/**
+ * For instruments without intra-day delta (e.g. mntusd via ExchangeRate-API
+ * returns daily resolution), suppress the misleading "+0.00%" by checking for
+ * a flat changePct combined with a single-point history.
+ */
+function hasNoIntradayDelta(instrument: MarketInstrument): boolean {
+  return instrument.changePct === 0 && instrument.history1w.length < 2;
+}
+
 function LiveRow({
   label,
   instrument,
@@ -156,6 +175,7 @@ function LiveRow({
   instrument: MarketInstrument;
 }) {
   const up = instrument.changePct >= 0;
+  const flatNoDelta = hasNoIntradayDelta(instrument);
   return (
     <>
       <span className="truncate font-sans text-[12px] md:text-[13px] font-medium text-foreground">
@@ -165,13 +185,22 @@ function LiveRow({
         <span className="font-mono text-[11px] md:text-[12px] text-foreground tabular-nums">
           {formatPrice(instrument)}
         </span>
-        <span
-          className={`w-14 text-right font-mono text-[10px] md:text-[11px] tabular-nums ${
-            up ? "text-up" : "text-down"
-          }`}
-        >
-          {formatChangePct(instrument.changePct)}
-        </span>
+        {flatNoDelta ? (
+          <span
+            aria-hidden="true"
+            className="w-14 text-right font-mono text-[10px] md:text-[11px] tabular-nums text-muted/60"
+          >
+            —
+          </span>
+        ) : (
+          <span
+            className={`w-14 text-right font-mono text-[10px] md:text-[11px] tabular-nums ${
+              up ? "text-up" : "text-down"
+            }`}
+          >
+            {formatChangePct(instrument.changePct)}
+          </span>
+        )}
       </div>
     </>
   );
@@ -179,11 +208,14 @@ function LiveRow({
 
 function StubRow({
   label,
-  approxValue,
+  price,
+  changePct,
 }: {
   label: string;
-  approxValue: string;
+  price: string;
+  changePct: number | null;
 }) {
+  const up = changePct !== null && changePct >= 0;
   return (
     <>
       <span
@@ -196,15 +228,25 @@ function StubRow({
         className="flex shrink-0 items-center gap-2"
         title={STUB_TOOLTIP}
       >
-        <span className="font-mono text-[11px] md:text-[12px] tabular-nums text-muted/80">
-          ≈ {approxValue}
+        <span className="font-mono text-[11px] md:text-[12px] tabular-nums italic text-muted/80">
+          {price}
         </span>
-        <span
-          aria-hidden="true"
-          className="w-14 text-right font-mono text-[10px] md:text-[11px] tabular-nums text-muted/60"
-        >
-          —
-        </span>
+        {changePct === null ? (
+          <span
+            aria-hidden="true"
+            className="w-14 text-right font-mono text-[10px] md:text-[11px] tabular-nums text-muted/60"
+          >
+            —
+          </span>
+        ) : (
+          <span
+            className={`w-14 text-right font-mono text-[10px] md:text-[11px] tabular-nums italic ${
+              up ? "text-up" : "text-down"
+            }`}
+          >
+            {formatChangePct(changePct)}
+          </span>
+        )}
       </div>
     </>
   );
