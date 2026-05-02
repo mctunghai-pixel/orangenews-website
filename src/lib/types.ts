@@ -16,6 +16,7 @@ export type RawCategory =
   | "crypto"
   | "business"
   | "economy"
+  | "mongolia"
   | "market_watch";
 
 export type PostType = "news" | "market_watch";

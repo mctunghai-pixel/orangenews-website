@@ -43,6 +43,7 @@ const CATEGORY_MAP: Record<RawCategory, DisplayCategory> = {
   crypto: "КРИПТО",
   business: "БИЗНЕС",
   economy: "ЭДИЙН ЗАСАГ",
+  mongolia: "МОНГОЛ",
   market_watch: "САНХҮҮ", // fallback (filtered out anyway)
 };
 
