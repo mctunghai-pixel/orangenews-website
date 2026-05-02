@@ -1,6 +1,7 @@
 // Homepage 4-quadrant market overview. Distinct from /market-watch route
-// (Phase 5.2 daily briefing). 8/12 cells live via Phase 5.3 pipeline; 4 cells
-// (SOL, MSE TOP-20, Оюу Толгой, Зэс) render with hardcoded mock data.
+// (Phase 5.2 daily briefing). 9/12 cells live (Phase 5.3 + Phase 6.2a); 3
+// remaining stubs (SOL, Оюу Толгой, Зэс) render with hardcoded mock data
+// pending future data-source decisions.
 //
 // Visual harmony principle: stub cells render visually identical to live cells
 // — same font, same weight, same color semantics on change %. The only
@@ -79,7 +80,7 @@ function buildCategories(
       title: "Монгол",
       cells: [
         live("USD/MNT", instruments.mntusd, { price: "—", changePct: null }),
-        { kind: "stub", label: "MSE TOP-20", price: "38,421", changePct: 0.24 },
+        live("MSE TOP-20", instruments.msetop20, { price: "—", changePct: null }),
         { kind: "stub", label: "Оюу Толгой", price: "4,120₮", changePct: 1.21 },
       ],
     },
