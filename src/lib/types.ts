@@ -132,3 +132,97 @@ export interface MarketDataResult {
   fetchedAt: Date;
   error?: string;
 }
+
+// -----------------------------------------------------------------------------
+// 5. MSE (Mongolian Stock Exchange) data types — Phase 6.2 backend
+// -----------------------------------------------------------------------------
+// Canonical shape: docs/mse_phase6.2_endpoint.md in orange-news-automation.
+// 8 datasets fetched twice daily via cron from mse.mn Server Actions.
+// Field names normalized at the boundary in fetch-mse-data.ts:
+//   change_pct  → changePct   |  change_abs → changeAbs
+//   amount_mnt  → amountMnt   |  logo_url   → logoUrl
+//   main_type   → mainType    |  started_at → startedAt
+//   min_price   → minPrice
+// -----------------------------------------------------------------------------
+
+export type MseDirection = "up" | "down" | "flat";
+
+/** Marquee ribbon row — broadest price coverage (61 symbols). */
+export interface MseMarqueeRow {
+  symbol: string;
+  price: number;
+  changePct: number;
+  changeAbs: number;
+  direction: MseDirection;
+}
+
+/** Common shape across stock_up / stock_down / stock_amount datasets. */
+export interface MseStockRow {
+  symbol: string;
+  name: string;
+  code: number;
+  logoUrl: string;
+  changePct: number;
+  changeAbs: number;
+  direction: MseDirection;
+}
+
+/** Top gainer / top loser row (stock_up + stock_down). */
+export interface MseStockMover extends MseStockRow {
+  price: number;
+}
+
+/** Most-active-by-amount row (stock_amount, MNT volume). */
+export interface MseStockAmount extends MseStockRow {
+  amountMnt: number;
+}
+
+/** Mining / commodity exchange (Comex) trade record. */
+export interface MseComexTrade {
+  id: number;
+  mainType: string;   // e.g. "Нүүрс" (Coal)
+  category: string;   // sub-classification
+  seller: string;
+  startedAt: string;  // ISO 8601 with Asia/Ulaanbaatar offset
+  minPrice: number;
+  price: number;
+  currency: string;   // "CNY" | "USD" | "MNT" | etc.
+  changeAbs: number;
+  changePct: number;
+  direction: MseDirection;
+}
+
+/** Top-20 index member — directory row, no price (use marquee for prices). */
+export interface MseTop20Member {
+  row: number;
+  symbol: string;
+  name: string;
+  code: number;
+}
+
+/** A-board / B-board listed company — directory row, no price. */
+export interface MseListedCompany {
+  row: number;
+  symbol: string;
+  name: string;
+  code: number;
+}
+
+/** Aggregate fetcher result (mirrors MarketDataResult envelope). */
+export interface MseDataResult {
+  marquee: MseMarqueeRow[];
+  stockAmount: MseStockAmount[];
+  stockUp: MseStockMover[];
+  stockDown: MseStockMover[];
+  comexTrade: MseComexTrade[];
+  mseAList: MseListedCompany[];
+  mseBList: MseListedCompany[];
+  top20List: MseTop20Member[];
+  source: "live" | "mock";
+  fetchedAt: Date;
+  fetchedAtMnt?: string;   // ISO 8601 +08:00 from backend
+  actionIdUsed?: string;   // backend operator visibility
+  rediscovered?: boolean;  // backend operator visibility
+  errors?: string[];       // per-dataset failures from backend
+  error?: string;          // frontend fetch error (mock-fallback reason)
+}

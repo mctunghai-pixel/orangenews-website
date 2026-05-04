@@ -239,7 +239,6 @@ export const markets: MarketCategory[] = [
     title: "Монгол",
     items: [
       { label: "MNT/USD", value: "3,475.00", change: -0.08 },
-      { label: "MSE TOP-20", value: "38,421", change: 0.24 },
       { label: "Оюу Толгой", value: "4,120₮", change: 1.21 },
     ],
   },

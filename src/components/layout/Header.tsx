@@ -12,6 +12,7 @@ const primaryNav = [
   { label: "Эдийн засаг", href: "/category/economy" },
   { label: "Крипто", href: "/category/crypto" },
   { label: "Монгол", href: "/category/mongolia" },
+  { label: "MSE", href: "/mse" },
   { label: "Санал бодол", href: "/category/opinion" },
 ];
 
