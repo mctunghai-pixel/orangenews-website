@@ -2,9 +2,9 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 5 — COMPLETE ✅ (100%, cross-repo: frontend + backend pipeline)
+## Current phase: Phase 6.2 — COMPLETE ✅ (Plan C — /mse Bloomberg-grade MSE route + MarketSnapshot Plan A migration, shipped 2026-05-04)
 
-See `Phase 5 — COMPLETE` section below. Phase 4 retained as reference.
+See `Phase 6.2 — COMPLETE` section below. Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7 reservations (article archive, subscribe layer) listed at end.
 
 ---
 
@@ -258,9 +258,116 @@ See `test_phase5.txt` for the regression endpoint list.
 
 ---
 
+## Phase 6.2 — COMPLETE ✅ (Plan C — /mse Bloomberg-grade MSE route)
+
+Day 4 marathon (2026-05-04). 13 commits, 8 mse.mn datasets, 6 polished components, full directional color semantics, sticky responsive ticker, Plan A migration of homepage MSE TOP-20 cell.
+
+| Step | Commit | Description |
+|---|---|---|
+| 1 | `ac6d341` | Foundation: `fetchMseData` + 8 MSE types + Header MSE tab |
+| 2 | `e548663` | `/mse` skeleton + 6 raw components rendering live data |
+| 3.1+3.2 | `ebf20c5` | `MseTickerRibbon` (Bloomberg marquee) + `SectionHeader` helper + page restructure |
+| 3.3 | `8a23d2c` | `MseTop20Members` table polish |
+| 3.4 | `d632d7a` | `MseStockMovers` gainers/losers polish |
+| 3.5 | `2a5ae26` | `MseStockAmount` volume table polish |
+| 3.6 | `57ceb5b` | `MseMiningTrades` commodity table polish |
+| 3.7 | `d2ddada` | `MseListedCompanies` directory polish |
+| 3.8 | `28b02a5` | Footer MSE link + Movers section header copy (Өсөгчид→Өсөлттэй, Бууруулагчид→Бууралттай) |
+| 3.9.1 | `4afe6bb` | Ticker speed slowdown (120s/180s) |
+| 3.9.2 | `4b62733` | Price column join across Top20 / mseAList / mseBList / stockAmount |
+| hotfix | `f4553cd` | Split ticker var families: `--animate-ticker-*` (TickerBar) vs `--animate-mse-ticker-*` (MseTickerRibbon) |
+| hotfix | `68e5d53` | Homepage Newsletter honest-UX (mirror `/newsletter` Phase 4.4.6 disabled-form pattern) |
+| 4.1 | `7f067eb` | MarketSnapshot Plan A — synthesize `instruments.msetop20` from mse.mn marquee; replace 3 fake-value stubs (SOL/Оюу Толгой/Зэс) with honest em-dash |
+
+**Plan B vs Plan C (decision retained for reference):**
+- **Plan B** (originally drafted in Phase 6.2 backlog): separate `/stocks/mongolia` route, TradingView embed fallback, deferred `mongolia_stocks` payload addition to `market_data.json`
+- **Plan C** (chosen, shipped): full `/mse` route via direct mse.mn Server Actions integration. 8 datasets (`marquee`, `stock_amount`, `stock_up`, `stock_down`, `comex_trade`, `mseA_list`, `mseB_list`, `top20_list`), no TradingView dep, source-of-truth pricing.
+
+**Routes shipped:**
+- `/mse` — full Bloomberg-grade landing page
+- Header tab "MSE" between Монгол and Санал бодол
+- Footer link "MSE" first in "Зах зээл" column
+- Homepage `MarketSnapshot` MSE TOP-20 cell wired live (was silently em-dash since `58e3e22` due to `TICKER_SLUG_MAP` whitelist filter dropping the backend's market_data.json#msetop20 entry)
+
+### Architectural decisions (Phase 6.2)
+
+#### 1. Sibling fetcher pattern — `src/lib/fetch-mse-data.ts`
+- Mirrors `fetch-market-data.ts` envelope: ISR 30 min revalidate, mock fallback, env override (`MSE_DATA_URL`)
+- 7 internal normalizers (marquee/stockMovers/stockAmount/comexTrade/top20/listedCompany/direction-guard)
+- Field naming normalized at boundary: `change_pct → changePct`, `amount_mnt → amountMnt`, `started_at → startedAt`, `min_price → minPrice`, `logo_url → logoUrl`
+- Sanity check: empty marquee → throw → mock fallback (catches stale-action-ID upstream failures)
+
+#### 2. `--header-height` CSS var — single source of truth for chrome dimensions
+- `globals.css @theme`: `--header-height: 68px;` (mobile, derived from `py-3 + h-11 button`); 76px desktop via `@media (min-width: 768px)`
+- Consumed by: `Header.tsx` (`h-[var(--header-height)]` on inner grid div) AND `MseTickerRibbon.tsx` (`sticky top-[var(--header-height)] z-20`)
+- Future Header redesign updates one line; sticky offsets auto-adjust. Zero magic numbers in components.
+
+#### 3. Ticker var split — separate animation tokens per surface
+- `--animate-ticker-mobile/-desktop` (60s/90s) → `TickerBar` (12 items × 2 = 24/cycle, 0.4 items/sec — original feel)
+- `--animate-mse-ticker-mobile/-desktop` (120s/180s) → `MseTickerRibbon` (61 items × 2 = 122/cycle, 1.0 items/sec — Bloomberg-pace)
+- Why split: shared var + 5× item-count delta produced wrong pace on whichever surface didn't drive the choice. Day 4 hotfix `f4553cd` introduced the split after initial unified slowdown unintentionally degraded TickerBar UX.
+
+#### 4. Marquee→directory price join — `Map<symbol, price>`
+- `fetch-mse-data.ts` builds `priceBySymbol = new Map(marquee.map(r => [r.symbol, r.price]))` after individual normalizers
+- Attaches `price?: number | null` to top20/mseAList/mseBList/stockAmount rows via immutable `map+spread` (idempotent, React-idiom)
+- B-board has ~40% missing coverage (illiquid stocks not in marquee) → render `—` fallback
+- Marquee remains the single source of truth for live MSE prices; directory rows are name+code lookup tables enriched with prices at fetch time
+
+#### 5. Per-row vs section-uniform direction coloring
+- `MseStockMovers`: section-uniform via `direction: "up" | "down"` prop — uniform `text-up` / `text-down` regardless of individual row sign
+- `MseTickerRibbon` + `MseMiningTrades`: per-row via `changeClass(pct)` helper (heterogeneous rows in one table)
+- `MseStockAmount`: muted `±%` / `±Abs` (`text-foreground/60`) — Amount is the headline, change is contextual
+
+#### 6. Synthesize-and-inject — Plan A migration in `src/app/page.tsx`
+- `fetchMseData()` joined into existing `Promise.all(fetchOrangeNews, fetchMarketData)`
+- MSE marquee `MSE` row → synthesized `MarketInstrument` (with empty `history1w`/`history1m`) → spread into `instruments` map at key `msetop20`
+- Bypasses `TICKER_SLUG_MAP` whitelist filter (which silently dropped `market_data.json#msetop20` since 58e3e22)
+- Graceful fallback chain: live MSE marquee → mock MSE marquee → original `marketInstruments.msetop20` (filtered = undefined) → `live()` helper degrades to em-dash. Net behavior never worse than today.
+
+#### 7. Manual ISO slice for date formatting (`MseMiningTrades.formatDate`)
+- `"2026-05-01T12:00:00" → "2026.05.01 12:00"` via `split("T") + replace + slice`
+- NOT `Intl.DateTimeFormat` — backend's `started_at` lacks TZ offset; auto-parsers would impose viewer's TZ (Vercel edge = UTC, browser = MNT) producing inconsistent display
+- Slice respects backend's published value verbatim. Real localized formatting deferred to future i18n pass.
+
+#### 8. Honest empty-state stubs (mirrors Phase 4.4.6 disabled-form pattern)
+- `MarketSnapshot` 3 unfilled cells (SOL/Оюу Толгой/Зэс): `price: "—"`, `changePct: null`
+- Replaced earlier hardcoded fake values (`$174.22` / `4,120₮` / `$4.18`) — visually muted, "Амьд өгөгдөл удахгүй идэвхжинэ" tooltip
+- Same Bloomberg-pattern visual harmony retained — no decoration, just neutral em-dash
+- Reasoning: SOL needs CoinGecko backend (orange-news-automation), Rio Tinto needs LSE/NYSE addition, copper needs commodity feed. All 3 are Phase 7+ scope.
+
+#### 9. Bloomberg-grade typography table system (TH_BASE / TD_NUM)
+- Card wrapper: `rounded-md border border-border overflow-hidden` (Mining: `overflow-x-auto` for column-dense scroll on mobile)
+- Headers: `font-sans text-xs uppercase tracking-wider font-semibold text-foreground/60` (sans for labels; mono reserved for body data)
+- Body numerics: `TD_NUM = "px-4 py-2.5 text-right font-mono tabular-nums text-foreground/60"`
+- Symbol column: `font-mono font-semibold text-foreground` (neutral, not accent — symbol is data not action; matches mse.mn convention)
+- Names: `font-serif-body` (Merriweather, Mongolian Cyrillic-friendly)
+- No zebra; only `border-b border-border last:border-b-0` between rows
+- `hover:bg-muted/10` (subtle, ambient, not buzzy)
+- TH_BASE + TD_NUM constants declared locally per component (not extracted to shared utility — YAGNI; consolidation deferred to housekeeping commit)
+
+#### 10. Action-ID rotation tolerance (backend `orange-news-automation` repo)
+- mse.mn Server Actions hash rotates ~1-3 months per Next.js redeploy
+- `mse_data_fetcher.py`: stale-action detection via `Content-Type != "x-component"` (NOT 4xx — mse.mn returns 200+homepage HTML when action stale)
+- Auto-rediscovery: scan `/_next/static/chunks/*.js` for action-ID pattern (high-confidence regex), brute-force probe fallback
+- Logged to `errors[]` in `mse_data.json` for operator visibility
+- See `docs/mse_phase6.2_endpoint.md` in `orange-news-automation` repo for full mechanics + 28-dataset enumeration (8 in MVP, 20 reserved for Phase 6.3+)
+
+#### 11. PRICE_FMT formatter — local declaration accepted, shared extraction deferred
+- `Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })` declared locally in 3 components (Top20, ListedCompanies, StockAmount aliases existing DEC_FMT)
+- Locale `en-US` consistent with TickerRibbon + Movers; comma separator universally readable in financial contexts
+- Future Mongolian locale (`mn-MN`, space separator: `162 901 009`) deferred to i18n pass
+- DRY refactor (extract to `src/lib/formatters.ts`) flagged for a later housekeeping commit
+
+#### 12. Honest UX hotfix on homepage Newsletter (`68e5d53`)
+- Before: form looked functional (`type="email"` enabled, "Бүртгүүлэх" CTA, "Spam үгүй" copy) but had NO submit handler → silently deceptive
+- After: matches `/newsletter` Phase 4.4.6 pattern — `disabled aria-disabled="true"`, `title="Тун удахгүй"`, "Бүртгэл удахгүй нээгдэнэ" copy + `mailto:info@orangenews.mn` fallback
+- Real Resend Audiences integration → Phase 7.2
+
+---
+
 ## Phase 6 — Backlog (DETAILED SCOPE)
 
-Phase 6 emphasis: **Mongolian-first content depth + domestic equities**. The Phase 5 pipeline brought global market data to parity with Bloomberg-style coverage; Phase 6 builds the home-market story (MSE, mining, FDI) that justifies the "Mongolian-first anchor" positioning from `/about`.
+Phase 6 emphasis: **Mongolian-first content depth + domestic equities**. The Phase 5 pipeline brought global market data to parity with Bloomberg-style coverage; Phase 6 builds the home-market story (MSE, mining, FDI) that justifies the "Mongolian-first anchor" positioning from `/about`. Phase 6.2 SHIPPED above; 6.1 / 6.3 / 6.4 remain.
 
 ### Phase 6.1: Mongolian content expansion (~2 hours)
 **Priority: HIGH** — immediate user value, no API research needed, mostly backend.
@@ -282,38 +389,15 @@ Phase 6 emphasis: **Mongolian-first content depth + domestic equities**. The Pha
 
 **Acceptance:** `/category/mongol` shows 5+ fresh Mongolian articles per day, mix of state news + business + mining.
 
-### Phase 6.2: MSE stocks section (~3–4 hours, research-dependent)
-**Priority: MEDIUM** — high user value but blocked on data-source feasibility.
+### Phase 6.2: MSE stocks section — ✅ SHIPPED via Plan C (see `Phase 6.2 — COMPLETE` above)
 
-**Research phase** (do this first — gates the rest):
-- MSE public API availability check (`mse.mn` developer docs)
-- Alternatives: web scraping (parser fragility risk), licensed broker API (cost), partnership outreach
-- Decision tree: API → live integration; scrape → daily snapshot; no source → TradingView widget embed as MVP
+**Status:** Realized 2026-05-04 as Plan C (`/mse` route + 8 mse.mn datasets) instead of the originally drafted Plan B (`/stocks/mongolia` + TradingView embed). The Plan B description that lived in this section has been retired — refer to the `Phase 6.2 — COMPLETE` block above for the full architectural record (12 architectural decisions, 13 commits, route + Header + Footer + MarketSnapshot integrations).
 
-**Top MSE companies to include** (initial set):
-- Erdenes Tavan Tolgoi (ETT)
-- Oyu Tolgoi (OT)
-- APU
-- MIK Holding
-- Suu
-- Khan Bank, Trade and Development Bank (TDB)
-
-**Frontend:**
-- New route: `/stocks/mongolia` (list view)
-  - Stock listing: name, price, change %, volume
-  - Live prices via `mongolia_stocks` payload (Phase 6.2 backend) OR TradingView embed fallback
-  - Per-stock detail: `/stocks/mongolia/[ticker]` with hero + chart + stats grid (mirror existing `/markets/[ticker]` pattern for consistency)
-- Header navigation: add "Хувьцаа" tab (between "Зах зээл" and "Market Watch", or replace one of the lower-priority items)
-- Footer: new "Хувьцаа" section with top 5 stocks linking to `/stocks/mongolia/[ticker]`
-- Homepage `MarketSnapshot` "Монгол" quadrant: replace 2 stubs (MSE TOP-20, Оюу Толгой) with live entries from `mongolia_stocks` — 4th followup of MarketSnapshot to retire the last 2 stubs
-
-**Backend** (only if MSE API or scrape lane confirmed):
-- Extend `market_data.json` with `mongolia_stocks` section: `{ ott: {...}, ot: {...}, apu: {...}, ... }` matching `MarketInstrument` schema (with `assetClass: "equity"` — new asset class)
-- Frontend: extend `AssetClass` type with `"equity"`, no `$` prefix in `formatPrice()` (₮ suffix instead — new helper or branch)
-- Add to GHA cron pipeline (same `*/30` cadence)
-- Document API source + cost in `orange-news-automation` README
-
-**Acceptance:** `/stocks/mongolia` lists 6+ MSE companies with current price + change %. Header tab navigates correctly. Detail page renders for at least 1 ticker.
+Notable differences between Plan B (drafted) and Plan C (shipped):
+- Plan B assumed no MSE API → TradingView fallback. Plan C discovered mse.mn's Next.js Server Actions endpoint (see `docs/mse_phase6.2_endpoint.md` in automation repo) — direct integration, no TradingView dep.
+- Plan B route was `/stocks/mongolia`. Plan C route is `/mse` (broader scope: index + companies + commodities + movers, not just stocks).
+- Plan B contemplated extending `market_data.json` with `mongolia_stocks`. Plan C added `mse_data.json` as a separate file (sibling fetcher pattern), preserving market_data.json's clean global-instruments shape.
+- Plan B planned `assetClass: "equity"` extension. Plan C kept the existing AssetClass union unchanged; MSE TOP-20 synthesizes as `asset: "index"`.
 
 ### Phase 6.3: Mining + foreign investment focus (~1 hour)
 **Priority: LOW** — content tagging refinement.
@@ -360,6 +444,61 @@ Phase 6 emphasis: **Mongolian-first content depth + domestic equities**. The Pha
 - Lighthouse performance audit
 - Accessibility (WCAG AA) audit
 - Backend canonicalization: rename `assetClass` → `asset`, `"forex"` → `"fx"`, history shape → `number[]` in `orange-news-automation` so the frontend normalizer (Phase 5.followup-2) can be retired
+
+---
+
+## Phase 7 — Reservations (next sessions)
+
+### Phase 7.1 — Article archive (Day 5)
+**Status:** RESERVED — frontend infrastructure ready, backend persistence redesign required.
+
+**Problem identified during Phase 6.2 reconnaissance:**
+- `fetchOrangeNews()` reads `translated_posts.json` at HEAD of `orange-news-automation` repo
+- Daily pipeline **overwrites** the file with the current day's 10 posts
+- Yesterday's articles disappear from `/category/finance`, `/category/tech`, etc. once today's pipeline runs
+- Frontend `/category/[cat]` and `/articles/[slug]` routes already exist and work correctly — the data layer is what's daily-replaced
+
+**Two viable shapes for backend redesign:**
+1. **Append-only `translated_posts.json`** — single file grows over time. Simplest, fragile beyond ~1000 posts.
+2. **Per-day files + index** — `archive/2026-05-04.json`, `archive/index.json` listing dates + post counts. Scales cleanly. Frontend fetcher does 2-step lookup: index → date file.
+
+**Recommended:** Option 2 (per-day + index).
+
+**Cross-repo work:**
+- `orange-news-automation`: pipeline writes `archive/{YYYY-MM-DD}.json` + maintains `archive/index.json` (sorted dates, count per day)
+- `orangenews-website`: extend `fetch-orange-news.ts` to handle archive lookup; add date-filter UI to `/category/[cat]` (optional progressive enhancement)
+- Migration: backfill from any retained snapshots / start fresh from Day 5 (user already accepted historical loss)
+
+**Acceptance:** `/category/finance` shows N days × 10 posts (paginated or filtered). RSS feed includes recent days, not just today.
+
+---
+
+### Phase 7.2 — Subscribe + admin layer (Day 6+)
+**Status:** RESERVED — UX placeholder shipped (honest disabled forms with `mailto:info@orangenews.mn` fallback), persistence pending.
+
+**Goal:** capture homepage Newsletter form + `/newsletter` form emails for marketing communication.
+
+**Recommended stack:** [Resend](https://resend.com)
+- **Resend Audiences** = built-in mailing list (capture + send from one tool, no separate Mailchimp / Sendinblue / Brevo account)
+- Free tier: 3K emails/month, 100 contacts (sufficient for early-stage list)
+- Official Next 16 SDK (`resend` npm package) + `@react-email/components` for HTML email templates
+
+**Implementation steps:**
+1. `npm install resend @react-email/components`
+2. Create `src/app/api/subscribe/route.ts` Server Action — accept email, validate, call `resend.contacts.create({ audienceId, email })`
+3. Add double opt-in confirmation email (GDPR-friendly, also reduces spam/bot signups)
+4. Wire homepage `Newsletter.tsx` form + `/newsletter` page form to the new endpoint (un-disable inputs, add submit handler with loading + success state)
+5. Admin export: use Resend dashboard directly (CSV download), OR add `src/app/api/admin/subscribers/route.ts` with auth gate
+6. Set `RESEND_API_KEY` + `RESEND_AUDIENCE_ID` env vars in Vercel project settings
+
+**Acceptance:**
+- Homepage form: enter email → "Confirmation email sent" inline feedback
+- User receives confirm email with verify link (double opt-in)
+- After confirm: contact appears in Resend Audience dashboard
+- Admin can export CSV via Resend UI or our admin endpoint
+- Both Newsletter.tsx + /newsletter page submit successfully (single endpoint, two surfaces)
+
+**Honest-UX hotfix shipped during Phase 6.2:** commit `68e5d53` — Newsletter.tsx form was silently deceptive (no submit handler, fake "Spam үгүй" copy implying it worked). Now matches the `/newsletter` page's Phase 4.4.6 disabled-form pattern. Phase 7.2 will un-disable both forms once backend persistence ships.
 
 ---
 
