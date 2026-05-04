@@ -18,8 +18,8 @@
   --font-sans: var(--font-plex-sans);
   --font-mono: var(--font-plex-mono);
 
-  --animate-ticker-mobile: ticker-scroll 60s linear infinite;
-  --animate-ticker-desktop: ticker-scroll 90s linear infinite;
+  --animate-ticker-mobile: ticker-scroll 120s linear infinite;
+  --animate-ticker-desktop: ticker-scroll 180s linear infinite;
   --animate-pulse-dot: pulse-dot 1.5s ease-in-out infinite;
   --animate-fade-up: fade-up 0.6s ease-out;
   --animate-drawer-in: drawer-in 0.25s ease-out;
