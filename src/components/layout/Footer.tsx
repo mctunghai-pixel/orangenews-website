@@ -31,6 +31,7 @@ const footerNav: FooterColumn[] = [
   {
     title: "Зах зээл",
     links: [
+      { label: "MSE", href: "/mse" },
       { label: "S&P 500", href: "/markets/spx" },
       { label: "Bitcoin", href: "/markets/btc" },
       { label: "USD/MNT", href: "/markets/mntusd" },

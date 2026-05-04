@@ -36,11 +36,11 @@ export default async function MsePage() {
           className="grid grid-cols-1 gap-8 py-8 md:grid-cols-2"
         >
           <div>
-            <SectionHeader title="Өсөгчид" />
+            <SectionHeader title="Өсөлттэй" />
             <MseStockMovers rows={data.stockUp} direction="up" />
           </div>
           <div>
-            <SectionHeader title="Бууруулагчид" />
+            <SectionHeader title="Бууралттай" />
             <MseStockMovers rows={data.stockDown} direction="down" />
           </div>
         </section>
