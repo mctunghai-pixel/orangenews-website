@@ -8,12 +8,39 @@ import { Newsletter } from "@/components/home/Newsletter";
 import { LiveEvent } from "@/components/home/LiveEvent";
 import { fetchOrangeNews } from "@/lib/fetch-orange-news";
 import { fetchMarketData } from "@/lib/fetch-market-data";
+import { fetchMseData } from "@/lib/fetch-mse-data";
+import type { MarketInstrument } from "@/lib/types";
 
 export default async function Home() {
-  const [{ articles }, { instruments }] = await Promise.all([
-    fetchOrangeNews(),
-    fetchMarketData(),
-  ]);
+  const [{ articles }, { instruments: marketInstruments }, mseData] =
+    await Promise.all([
+      fetchOrangeNews(),
+      fetchMarketData(),
+      fetchMseData(),
+    ]);
+
+  // Plan A: synthesize MSE TOP-20 from mse.mn marquee (source of truth) and
+  // inject into instruments map. Replaces the previous market_data.json
+  // msetop20 path, which never reached the cell anyway — `msetop20` was
+  // missing from TICKER_SLUG_MAP, so fetchMarketData() filtered it out.
+  const mseIndex = mseData.marquee.find((r) => r.symbol === "MSE");
+  const instruments: Record<string, MarketInstrument> = mseIndex
+    ? {
+        ...marketInstruments,
+        msetop20: {
+          slug: "msetop20",
+          symbol: "MSE",
+          name: "MSE TOP-20",
+          asset: "index",
+          price: mseIndex.price,
+          change: mseIndex.changeAbs,
+          changePct: mseIndex.changePct,
+          history1w: [],
+          history1m: [],
+        },
+      }
+    : marketInstruments;
+
   const spx = instruments.spx;
 
   // Filter news-only (exclude market watch) and sort by score desc

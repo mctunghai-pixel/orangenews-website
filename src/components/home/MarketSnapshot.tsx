@@ -73,7 +73,7 @@ function buildCategories(
       cells: [
         live("BTC", instruments.btc, { price: "—", changePct: null }),
         live("ETH", instruments.eth, { price: "—", changePct: null }),
-        { kind: "stub", label: "SOL", price: "$174.22", changePct: -0.67 },
+        { kind: "stub", label: "SOL", price: "—", changePct: null },
       ],
     },
     {
@@ -81,7 +81,7 @@ function buildCategories(
       cells: [
         live("USD/MNT", instruments.mntusd, { price: "—", changePct: null }),
         live("MSE TOP-20", instruments.msetop20, { price: "—", changePct: null }),
-        { kind: "stub", label: "Оюу Толгой", price: "4,120₮", changePct: 1.21 },
+        { kind: "stub", label: "Оюу Толгой", price: "—", changePct: null },
       ],
     },
     {
@@ -89,7 +89,7 @@ function buildCategories(
       cells: [
         live("Алт", instruments.xau, { price: "—", changePct: null }),
         live("OIL WTI", instruments.cl, { price: "—", changePct: null }),
-        { kind: "stub", label: "Зэс", price: "$4.18", changePct: 0.33 },
+        { kind: "stub", label: "Зэс", price: "—", changePct: null },
       ],
     },
   ];
