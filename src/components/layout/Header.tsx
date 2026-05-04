@@ -32,7 +32,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 bg-background border-b border-border">
-      <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-3 md:px-6 md:py-4">
+      <div className="mx-auto grid h-[var(--header-height)] max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 md:px-6">
         <div className="flex items-center gap-5">
           <button
             type="button"

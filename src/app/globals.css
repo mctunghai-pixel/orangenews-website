@@ -23,6 +23,17 @@
   --animate-pulse-dot: pulse-dot 1.5s ease-in-out infinite;
   --animate-fade-up: fade-up 0.6s ease-out;
   --animate-drawer-in: drawer-in 0.25s ease-out;
+
+  /* Layout tokens — single source of truth for chrome dimensions.
+     Header inner-grid: items-center + h-11 buttons (44px) + py-3/py-4.
+     Mobile = 12+44+12 = 68. Desktop = 16+44+16 = 76 (overridden below). */
+  --header-height: 68px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --header-height: 76px;
+  }
 }
 
 @keyframes ticker-scroll {
