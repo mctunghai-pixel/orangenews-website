@@ -37,11 +37,11 @@ export default async function MsePage() {
         >
           <div>
             <SectionHeader title="Өсөгчид" />
-            <MseStockMovers rows={data.stockUp} />
+            <MseStockMovers rows={data.stockUp} direction="up" />
           </div>
           <div>
             <SectionHeader title="Бууруулагчид" />
-            <MseStockMovers rows={data.stockDown} />
+            <MseStockMovers rows={data.stockDown} direction="down" />
           </div>
         </section>
 
