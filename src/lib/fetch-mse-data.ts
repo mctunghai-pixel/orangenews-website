@@ -223,6 +223,18 @@ export async function fetchMseData(): Promise<MseDataResult> {
       fetchedAt: new Date(),
     };
 
+    // Join marquee prices into directory + amount datasets by symbol.
+    // Marquee remains the single source of truth for live prices; rows
+    // whose symbol is absent from marquee fall back to null.
+    const priceBySymbol = new Map<string, number>();
+    for (const r of result.marquee) priceBySymbol.set(r.symbol, r.price);
+    const attach = <T extends { symbol: string }>(rows: T[]): (T & { price: number | null })[] =>
+      rows.map((r) => ({ ...r, price: priceBySymbol.get(r.symbol) ?? null }));
+    result.top20List = attach(result.top20List);
+    result.mseAList = attach(result.mseAList);
+    result.mseBList = attach(result.mseBList);
+    result.stockAmount = attach(result.stockAmount);
+
     if (typeof raw.fetched_at_mnt === "string") result.fetchedAtMnt = raw.fetched_at_mnt;
     if (typeof raw.action_id_used === "string") result.actionIdUsed = raw.action_id_used;
     if (typeof raw.rediscovered === "boolean") result.rediscovered = raw.rediscovered;

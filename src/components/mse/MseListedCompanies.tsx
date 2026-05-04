@@ -9,6 +9,11 @@ const TH_BASE =
   "px-4 py-2 font-sans text-xs font-semibold uppercase tracking-wider text-foreground/60";
 const TD_NUM = "px-4 py-2.5 text-right font-mono tabular-nums text-foreground/60";
 
+const PRICE_FMT = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 function CompanyTable({
   heading,
   rows,
@@ -30,6 +35,7 @@ function CompanyTable({
               <th className={`${TH_BASE} text-left`}>Ticker</th>
               <th className={`${TH_BASE} text-left`}>Name</th>
               <th className={`${TH_BASE} text-right`}>Code</th>
+              <th className={`${TH_BASE} text-right`}>Price</th>
             </tr>
           </thead>
           <tbody>
@@ -46,6 +52,9 @@ function CompanyTable({
                   {r.name}
                 </td>
                 <td className={TD_NUM}>{r.code}</td>
+                <td className={TD_NUM}>
+                  {r.price != null ? PRICE_FMT.format(r.price) : "—"}
+                </td>
               </tr>
             ))}
           </tbody>

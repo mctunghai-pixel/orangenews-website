@@ -13,6 +13,7 @@ const DEC_FMT = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+const PRICE_FMT = DEC_FMT;
 
 function formatPct(n: number): string {
   const sign = n > 0 ? "+" : "";
@@ -34,6 +35,7 @@ export function MseStockAmount({ rows }: Props) {
             <th className={`${TH_BASE} text-left`}>Ticker</th>
             <th className={`${TH_BASE} text-left`}>Name</th>
             <th className={`${TH_BASE} text-right`}>Code</th>
+            <th className={`${TH_BASE} text-right`}>Price</th>
             <th className={`${TH_BASE} text-right`}>Amount (MNT)</th>
             <th className={`${TH_BASE} text-right`}>±%</th>
             <th className={`${TH_BASE} text-right`}>±Abs</th>
@@ -53,6 +55,9 @@ export function MseStockAmount({ rows }: Props) {
                 {r.name}
               </td>
               <td className={TD_NUM}>{r.code}</td>
+              <td className={TD_NUM}>
+                {r.price != null ? PRICE_FMT.format(r.price) : "—"}
+              </td>
               <td className="px-4 py-2.5 text-right font-mono font-semibold tabular-nums text-foreground">
                 {AMOUNT_FMT.format(r.amountMnt)}
               </td>

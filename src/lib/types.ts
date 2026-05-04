@@ -175,6 +175,8 @@ export interface MseStockMover extends MseStockRow {
 /** Most-active-by-amount row (stock_amount, MNT volume). */
 export interface MseStockAmount extends MseStockRow {
   amountMnt: number;
+  /** Joined from marquee at fetch time; null when symbol absent from marquee. */
+  price?: number | null;
 }
 
 /** Mining / commodity exchange (Comex) trade record. */
@@ -192,20 +194,24 @@ export interface MseComexTrade {
   direction: MseDirection;
 }
 
-/** Top-20 index member — directory row, no price (use marquee for prices). */
+/** Top-20 index member — directory row. Price joined from marquee at fetch time. */
 export interface MseTop20Member {
   row: number;
   symbol: string;
   name: string;
   code: number;
+  /** Joined from marquee at fetch time; null when symbol absent from marquee. */
+  price?: number | null;
 }
 
-/** A-board / B-board listed company — directory row, no price. */
+/** A-board / B-board listed company — directory row. Price joined from marquee at fetch time. */
 export interface MseListedCompany {
   row: number;
   symbol: string;
   name: string;
   code: number;
+  /** Joined from marquee at fetch time; null when symbol absent from marquee. */
+  price?: number | null;
 }
 
 /** Aggregate fetcher result (mirrors MarketDataResult envelope). */
