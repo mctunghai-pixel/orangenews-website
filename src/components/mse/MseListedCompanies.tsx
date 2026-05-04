@@ -5,40 +5,61 @@ interface Props {
   bList: MseListedCompany[];
 }
 
-function CompanyTable({ heading, rows }: { heading: string; rows: MseListedCompany[] }) {
+const TH_BASE =
+  "px-4 py-2 font-sans text-xs font-semibold uppercase tracking-wider text-foreground/60";
+const TD_NUM = "px-4 py-2.5 text-right font-mono tabular-nums text-foreground/60";
+
+function CompanyTable({
+  heading,
+  rows,
+}: {
+  heading: string;
+  rows: MseListedCompany[];
+}) {
   return (
     <div>
-      <h3>{heading} ({rows.length})</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Row</th>
-            <th>Symbol</th>
-            <th>Name</th>
-            <th>Code</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.code}>
-              <td>{r.row}</td>
-              <td>{r.symbol}</td>
-              <td>{r.name}</td>
-              <td>{r.code}</td>
+      <h3 className="mb-2 font-sans text-xs font-semibold uppercase tracking-wider text-foreground">
+        {heading}{" "}
+        <span className="text-foreground/60">({rows.length})</span>
+      </h3>
+      <div className="overflow-hidden rounded-md border border-border">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="bg-foreground/5">
+              <th className={`${TH_BASE} text-right`}>#</th>
+              <th className={`${TH_BASE} text-left`}>Ticker</th>
+              <th className={`${TH_BASE} text-left`}>Name</th>
+              <th className={`${TH_BASE} text-right`}>Code</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr
+                key={r.code}
+                className="border-b border-border transition-colors last:border-b-0 hover:bg-muted/10"
+              >
+                <td className={TD_NUM}>{r.row}</td>
+                <td className="px-4 py-2.5 text-left font-mono font-semibold text-foreground">
+                  {r.symbol}
+                </td>
+                <td className="px-4 py-2.5 text-left font-serif-body text-foreground">
+                  {r.name}
+                </td>
+                <td className={TD_NUM}>{r.code}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
 
 export function MseListedCompanies({ aList, bList }: Props) {
   return (
-    <section>
-      <h2>MseListedCompanies</h2>
+    <div className="space-y-8">
       <CompanyTable heading="A-board" rows={aList} />
       <CompanyTable heading="B-board" rows={bList} />
-    </section>
+    </div>
   );
 }
