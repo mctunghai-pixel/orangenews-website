@@ -38,7 +38,7 @@ export function MseTickerRibbon({ rows }: Props) {
       aria-label="MSE үнийн зурвас"
       className="sticky top-[var(--header-height)] z-20 w-full overflow-hidden border-y border-border bg-foreground py-2 text-background motion-reduce:overflow-x-auto"
     >
-      <ul className="flex w-max items-center gap-8 whitespace-nowrap animate-ticker-mobile motion-reduce:animate-none md:animate-ticker-desktop">
+      <ul className="flex w-max items-center gap-8 whitespace-nowrap animate-mse-ticker-mobile motion-reduce:animate-none md:animate-mse-ticker-desktop">
         {looped.map((r, i) => (
           <li
             key={`${r.symbol}-${i}`}
