@@ -2,9 +2,9 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 6.2 — COMPLETE ✅ (Plan C — /mse Bloomberg-grade MSE route + MarketSnapshot Plan A migration, shipped 2026-05-04)
+## Current phase: Phase 7.1 — COMPLETE ✅ (article archive: per-day snapshots + 7-day RSS window + archive-aware /articles/[slug], shipped 2026-05-05)
 
-See `Phase 6.2 — COMPLETE` section below. Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7 reservations (article archive, subscribe layer) listed at end.
+See `Phase 7.1 — COMPLETE` section below. Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7.2 reservation (subscribe layer) + Phase 7.1.x deferrals (date-filter UI, /category widening) listed at end.
 
 ---
 
@@ -449,27 +449,30 @@ Notable differences between Plan B (drafted) and Plan C (shipped):
 
 ## Phase 7 — Reservations (next sessions)
 
-### Phase 7.1 — Article archive (Day 5)
-**Status:** RESERVED — frontend infrastructure ready, backend persistence redesign required.
+### Phase 7.1 — Article archive — ✅ COMPLETE (Day 5, shipped 2026-05-05)
+**Status:** Shipped as MVP + RSS scope. Backend per-day snapshots + index manifest live; frontend fetcher does archive lookup; RSS feed expanded to 7-day window; `/articles/[slug]` resolves archived slugs via archive-search fallback.
 
-**Problem identified during Phase 6.2 reconnaissance:**
-- `fetchOrangeNews()` reads `translated_posts.json` at HEAD of `orange-news-automation` repo
-- Daily pipeline **overwrites** the file with the current day's 10 posts
-- Yesterday's articles disappear from `/category/finance`, `/category/tech`, etc. once today's pipeline runs
-- Frontend `/category/[cat]` and `/articles/[slug]` routes already exist and work correctly — the data layer is what's daily-replaced
+**Problem solved:** `fetchOrangeNews()` formerly read `translated_posts.json` at HEAD; the daily pipeline overwrote it, so yesterday's articles vanished from `/articles/[slug]`, `/category/[cat]`, and `/rss.xml` once today's pipeline ran. Routes existed and worked — only the data layer was daily-replaced.
 
-**Two viable shapes for backend redesign:**
-1. **Append-only `translated_posts.json`** — single file grows over time. Simplest, fragile beyond ~1000 posts.
-2. **Per-day files + index** — `archive/2026-05-04.json`, `archive/index.json` listing dates + post counts. Scales cleanly. Frontend fetcher does 2-step lookup: index → date file.
+**Backend (`orange-news-automation`, commit `31930e0`):**
+- `archive_writer.py` snapshots `translated_posts.json` → `archive/posts_{YYYY-MM-DD}.json` (wrapped: `{date, generated_at, source, posts[]}`) and upserts `archive/index.json` (sorted desc by date). Idempotent; mtime guard prevents stale snapshots if Phase 2 (translator) failed.
+- New Phase 3.5 step in `orange_news.yml` + `market_watch_live.yml`, both `if: always()`. Phase 4 commit step extended to stage `archive/`.
+- `.gitignore` `!archive/` + `!archive/*.json` allowlist past the existing `*.json` blanket — without this every archive write would have been silently dropped by git.
+- See `docs/archive_phase7.1.md` in the backend repo for full schema + workflow integration notes.
 
-**Recommended:** Option 2 (per-day + index).
+**Frontend (this repo, commits `1acda86` → `59a21db` → `4022c61`):**
+- `lib/fetch-orange-news.ts`: new `fetchArchiveIndex` + `fetchArchiveDay(date)` helpers (raw GitHub URLs, same 30-min ISR window as today feed). `fetchOrangeNews({archiveDays: N})` opt-in unions the most recent N dates by score desc; no-arg call preserves today-only behavior. `getPostBySlug(slug)` checks today first then walks archive desc. `mapPost()` threads per-day `publishedAt` from archive metadata. Cross-bucket `globalIdx` prevents `generateId` collisions.
+- `lib/types.ts`: `FetchOrangeNewsOptions`, `ArchiveIndexEntry`, `ArchiveDay`.
+- `app/rss.xml/route.ts`: `fetchOrangeNews({archiveDays: 7})`. Top-20-by-score + 1h ISR preserved. Window as `RSS_ARCHIVE_WINDOW_DAYS` constant.
+- `app/articles/[slug]/page.tsx`: `getPostBySlug(slug)` for resolution, `fetchOrangeNews({archiveDays: 7})` for prev/next nav. Caught during Checkpoint D verification — earlier checkpoints had the helper but had not wired it into the route.
 
-**Cross-repo work:**
-- `orange-news-automation`: pipeline writes `archive/{YYYY-MM-DD}.json` + maintains `archive/index.json` (sorted dates, count per day)
-- `orangenews-website`: extend `fetch-orange-news.ts` to handle archive lookup; add date-filter UI to `/category/[cat]` (optional progressive enhancement)
-- Migration: backfill from any retained snapshots / start fresh from Day 5 (user already accepted historical loss)
+**Verification (D):** Stub server with fabricated 2-day archive served via `python3 -m http.server`. Today fast-path 200, yesterday archive-fallback 200 (body confirmed to render the stub headline), nonexistent slug 404. Production-URL re-test against the live 1-day archive: today 200, fabricated yesterday 404 (correct — real archive has no Day 4), nonexistent 404.
 
-**Acceptance:** `/category/finance` shows N days × 10 posts (paginated or filtered). RSS feed includes recent days, not just today.
+**Migration policy:** Fresh start from 2026-05-05. Apr 23 – May 3 articles intentionally not migrated.
+
+**Deferred to Phase 7.1.x:**
+- Date-filter UI on `/category/[cat]` — design decision postponed until 7+ days of archive accumulate so we can observe what users want. No pagination convention exists in the repo today; the design needs its own pass.
+- `app/category/[cat]/page.tsx` widening to consume `archiveDays`. Category route still calls today-only `fetchOrangeNews()`. The explicit acceptance line (`/category/finance shows N days × 10 posts`) is partially met via `/articles/[slug]` resolution + RSS expansion; the category page itself is a follow-up.
 
 ---
 
