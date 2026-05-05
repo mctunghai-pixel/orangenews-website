@@ -7,9 +7,12 @@
 // =============================================================================
 
 import type {
+  ArchiveDay,
+  ArchiveIndexEntry,
   Article,
   ArticlePattern,
   DisplayCategory,
+  FetchOrangeNewsOptions,
   FetchOrangeNewsResult,
   OrangeNewsPost,
   RawCategory,
@@ -25,6 +28,18 @@ import { slugify } from "./slug";
 /** GitHub raw URL — translated_posts.json from orange-news-automation repo */
 const ORANGE_NEWS_JSON_URL =
   "https://raw.githubusercontent.com/mctunghai-pixel/orange-news-automation/main/translated_posts.json";
+
+/** GitHub raw base URL for the daily archive (Phase 7.1). */
+const ARCHIVE_BASE_URL =
+  "https://raw.githubusercontent.com/mctunghai-pixel/orange-news-automation/main/archive";
+
+/** Index manifest URL — `[{date, count}]` sorted desc by date. */
+const ARCHIVE_INDEX_URL = `${ARCHIVE_BASE_URL}/index.json`;
+
+/** Per-day snapshot URL builder. */
+function archiveDayUrl(date: string): string {
+  return `${ARCHIVE_BASE_URL}/posts_${date}.json`;
+}
 
 /** ISR revalidation interval — 30 minutes (Vercel free tier friendly) */
 const REVALIDATE_SECONDS = 1800;
@@ -130,12 +145,13 @@ function estimateReadTime(text: string): number {
 // 6. Mappers
 // -----------------------------------------------------------------------------
 
-/** Map raw OrangeNewsPost (from JSON) → normalized Article */
-function mapPost(post: OrangeNewsPost, idx: number): Article {
+/** Map raw OrangeNewsPost (from JSON) → normalized Article.
+ *  publishedAt: when archive lookup is in play, callers pass the per-day
+ *  snapshot date. Today-only path falls back to fetch time. */
+function mapPost(post: OrangeNewsPost, idx: number, publishedAt: Date = new Date()): Article {
   const category = mapCategory(post.category);
   const body = post.body_only || post.full_post || post.post_text || "";
   const sourceUrl = post.url || post.original_url || "https://www.orangenews.mn";
-  const publishedAt = new Date(); // JSON has no timestamp; use fetch time
 
   return {
     id: generateId(sourceUrl, idx),
@@ -184,50 +200,99 @@ function getMockArticles(): Article[] {
 }
 
 // -----------------------------------------------------------------------------
-// 7. Main fetcher
+// 7. Archive helpers (Phase 7.1)
+// -----------------------------------------------------------------------------
+
+/** Treat YYYY-MM-DD as start-of-day UTC — preserves date-bucket semantics
+ *  across timezones for `Article.publishedAt` derived from archive metadata. */
+function archiveDateToDate(date: string): Date {
+  return new Date(`${date}T00:00:00Z`);
+}
+
+/** Fetch archive/index.json — sorted desc by date, throws on any failure. */
+async function fetchArchiveIndex(): Promise<ArchiveIndexEntry[]> {
+  const res = await fetch(ARCHIVE_INDEX_URL, {
+    next: { revalidate: REVALIDATE_SECONDS },
+  });
+  if (!res.ok) throw new Error(`archive index HTTP ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  if (!Array.isArray(data)) throw new Error("archive index: expected array");
+  return data as ArchiveIndexEntry[];
+}
+
+/** Fetch a single per-day archive file. */
+async function fetchArchiveDay(date: string): Promise<ArchiveDay> {
+  const res = await fetch(archiveDayUrl(date), {
+    next: { revalidate: REVALIDATE_SECONDS },
+  });
+  if (!res.ok) throw new Error(`archive ${date} HTTP ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  if (!data || !Array.isArray(data.posts)) {
+    throw new Error(`archive ${date}: invalid shape`);
+  }
+  return data as ArchiveDay;
+}
+
+// -----------------------------------------------------------------------------
+// 8. Main fetcher
 // -----------------------------------------------------------------------------
 
 /**
  * Fetch live news from automation repo. Falls back to mock data on any error.
  *
- * Phase 1: GitHub URL returns 404 (translated_posts.json not pushed yet)
- *          → catch block → mock fallback → website displays mock content
- * Phase 2: After enabling JSON push from automation repo
- *          → fetch succeeds → live Article[] returned
+ * Default behavior (no opts): reads today's `translated_posts.json` at HEAD —
+ * preserves the original homepage feed contract.
+ *
+ * Archive mode (`opts.archiveDays = N`): fetches the index manifest, walks the
+ * top-N most recent dates, unions their news posts, and sorts by score desc.
+ * Used by /articles/[slug] (via getPostBySlug) and /rss.xml.
  */
-export async function fetchOrangeNews(): Promise<FetchOrangeNewsResult> {
+export async function fetchOrangeNews(
+  opts?: FetchOrangeNewsOptions,
+): Promise<FetchOrangeNewsResult> {
   const fetchedAt = new Date();
+  const archiveDays = opts?.archiveDays && opts.archiveDays > 0 ? opts.archiveDays : 0;
 
   try {
-    const response = await fetch(ORANGE_NEWS_JSON_URL, {
-      next: { revalidate: REVALIDATE_SECONDS },
-    });
+    type Bucket = { posts: OrangeNewsPost[]; publishedAt: Date };
+    let buckets: Bucket[];
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status} ${response.statusText}`);
+    if (archiveDays > 0) {
+      const index = await fetchArchiveIndex();
+      const wanted = index.slice(0, archiveDays);
+      const days = await Promise.all(
+        wanted.map((entry) => fetchArchiveDay(entry.date).catch(() => null)),
+      );
+      buckets = days
+        .filter((d): d is ArchiveDay => d !== null)
+        .map((d) => ({ posts: d.posts, publishedAt: archiveDateToDate(d.date) }));
+      if (buckets.length === 0) throw new Error("archive: no days fetched");
+    } else {
+      const response = await fetch(ORANGE_NEWS_JSON_URL, {
+        next: { revalidate: REVALIDATE_SECONDS },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} ${response.statusText}`);
+      }
+      const rawData = await response.json();
+      if (!Array.isArray(rawData)) throw new Error("Invalid JSON: expected array");
+      buckets = [{ posts: rawData as OrangeNewsPost[], publishedAt: fetchedAt }];
     }
 
-    const rawData = (await response.json()) as OrangeNewsPost[];
-
-    if (!Array.isArray(rawData)) {
-      throw new Error("Invalid JSON: expected array");
+    // Filter market_watch (handled by dedicated widget) + map across buckets.
+    // Global idx ensures unique IDs across multi-day unions.
+    const articles: Article[] = [];
+    let globalIdx = 0;
+    for (const bucket of buckets) {
+      const newsPosts = bucket.posts.filter((p) => p.type === "news");
+      for (const post of newsPosts) {
+        articles.push(mapPost(post, globalIdx++, bucket.publishedAt));
+      }
     }
+    articles.sort((a, b) => b.score - a.score);
 
-    // Filter out market_watch posts (handled by dedicated MarketWatch widget)
-    const newsPosts = rawData.filter((p) => p.type === "news");
-
-    // Map raw posts → normalized Articles
-    const articles = newsPosts
-      .map((post, idx) => mapPost(post, idx))
-      .sort((a, b) => b.score - a.score);
-
-    return {
-      articles,
-      source: "live",
-      fetchedAt,
-    };
+    return { articles, source: "live", fetchedAt };
   } catch (error) {
-    // Phase 1 expected behavior: fall back to mock
     const message = error instanceof Error ? error.message : String(error);
     return {
       articles: getMockArticles(),
@@ -238,8 +303,36 @@ export async function fetchOrangeNews(): Promise<FetchOrangeNewsResult> {
   }
 }
 
-/** Get a single article by its slug - used by /articles/[slug] route */
+/**
+ * Get a single article by its slug — used by /articles/[slug] route.
+ *
+ * Strategy: today's HEAD first (fast, hot path). On miss, walk archive index
+ * desc and search per-day files until found or exhausted. Returns null on
+ * total miss (route maps null → notFound() → 404).
+ */
 export async function getPostBySlug(slug: string): Promise<Article | null> {
-  const { articles } = await fetchOrangeNews();
-  return articles.find((a) => a.slug === slug) ?? null;
+  const today = await fetchOrangeNews();
+  const found = today.articles.find((a) => a.slug === slug);
+  if (found) return found;
+
+  try {
+    const index = await fetchArchiveIndex();
+    for (const entry of index) {
+      try {
+        const day = await fetchArchiveDay(entry.date);
+        const dayDate = archiveDateToDate(day.date);
+        const newsPosts = day.posts.filter((p) => p.type === "news");
+        for (let i = 0; i < newsPosts.length; i++) {
+          const article = mapPost(newsPosts[i], i, dayDate);
+          if (article.slug === slug) return article;
+        }
+      } catch {
+        // Skip unreadable day, try next.
+      }
+    }
+  } catch {
+    // Index unavailable (network down, 404). Fall through to null.
+  }
+
+  return null;
 }

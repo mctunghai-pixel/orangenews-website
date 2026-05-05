@@ -98,6 +98,37 @@ export interface FetchOrangeNewsResult {
   error?: string;
 }
 
+/** Options for fetchOrangeNews — opt-in archive-window behavior. */
+export interface FetchOrangeNewsOptions {
+  /**
+   * When set to N > 0, fetch the union of the last N days from the archive
+   * instead of today's HEAD `translated_posts.json`. Articles across days
+   * are merged then sorted by score desc. Default: undefined (today only).
+   */
+  archiveDays?: number;
+}
+
+// -----------------------------------------------------------------------------
+// 3.5. Archive types — Phase 7.1 (per-day snapshots + index manifest)
+// -----------------------------------------------------------------------------
+// Backend writes these via archive_writer.py after each pipeline run.
+// Index lives at archive/index.json; per-day files at archive/posts_{date}.json.
+// -----------------------------------------------------------------------------
+
+/** Single entry in archive/index.json. */
+export interface ArchiveIndexEntry {
+  date: string;   // YYYY-MM-DD (MNT editorial day)
+  count: number;  // posts in the per-day file
+}
+
+/** Wrapped per-day snapshot file (archive/posts_{date}.json). */
+export interface ArchiveDay {
+  date: string;          // YYYY-MM-DD
+  generated_at: string;  // ISO 8601 UTC
+  source: string;        // workflow filename ('orange_news.yml' / 'market_watch_live.yml' / 'manual')
+  posts: OrangeNewsPost[];
+}
+
 // -----------------------------------------------------------------------------
 // 4. Market data types — for /markets/[ticker] routes + TickerBar
 // -----------------------------------------------------------------------------
