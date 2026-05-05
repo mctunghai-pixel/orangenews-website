@@ -18,7 +18,9 @@ export default async function CategoryPage({ params }: PageProps) {
 
   const category = slugToCategory(cat);
   const matchValues = getCategoryMatchValues(category);
-  const { articles } = await fetchOrangeNews();
+  // 7-day archive window — same scope as /rss.xml. Completes the Phase 7.1
+  // acceptance criterion ("/category/finance shows N days × 10 posts").
+  const { articles } = await fetchOrangeNews({ archiveDays: 7 });
   const filtered = articles.filter(
     (a) => !a.isMarketWatch && matchValues.includes(a.category),
   );
