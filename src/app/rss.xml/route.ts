@@ -2,11 +2,15 @@
 // RSS 2.0 feed route — /rss.xml
 // =============================================================================
 // Server-side route handler that emits RSS 2.0 XML for Orange News articles.
-// Pulls top 20 by score (news-only filter), wraps Cyrillic content in CDATA,
-// formats pubDate per RFC 822. Cached for 1 hour to balance freshness/cost.
+// Pulls the most recent 7 days from the Phase 7.1 archive, then top 20 by
+// score, wraps Cyrillic content in CDATA, formats pubDate per RFC 822.
+// Cached for 1 hour to balance freshness/cost.
 // =============================================================================
 
 import { fetchOrangeNews } from "@/lib/fetch-orange-news";
+
+/** Days of archive to include when building the feed. */
+const RSS_ARCHIVE_WINDOW_DAYS = 7;
 
 export const revalidate = 3600; // 1 hour ISR
 
@@ -51,7 +55,7 @@ function truncateForDescription(s: string, max = 300): string {
 }
 
 export async function GET() {
-  const { articles } = await fetchOrangeNews();
+  const { articles } = await fetchOrangeNews({ archiveDays: RSS_ARCHIVE_WINDOW_DAYS });
 
   const items = articles
     .filter((a) => !a.isMarketWatch)
