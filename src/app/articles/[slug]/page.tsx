@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { fetchOrangeNews } from "@/lib/fetch-orange-news";
+import { fetchOrangeNews, getPostBySlug } from "@/lib/fetch-orange-news";
 import { ArticleNavigation } from "@/components/articles/ArticleNavigation";
 
 interface PageProps {
@@ -9,18 +9,20 @@ interface PageProps {
 
 export default async function ArticlePage({ params }: PageProps) {
   const { slug } = await params;
-  const { articles } = await fetchOrangeNews();
-  const article = articles.find((a) => a.slug === slug);
+  const article = await getPostBySlug(slug);
 
   if (!article) notFound();
 
-  // Build navigation list — same order as homepage (news only, score desc)
-  const navList = articles
+  // Navigation: 7-day archive window, score desc. Articles older than the
+  // window get null prev/next (acceptable degradation — they're still
+  // resolvable via direct URL, just without in-feed neighbors).
+  const { articles: navList } = await fetchOrangeNews({ archiveDays: 7 });
+  const sorted = navList
     .filter((a) => !a.isMarketWatch)
     .sort((a, b) => b.score - a.score);
-  const idx = navList.findIndex((a) => a.slug === slug);
-  const prev = idx > 0 ? navList[idx - 1] : null;
-  const next = idx >= 0 && idx < navList.length - 1 ? navList[idx + 1] : null;
+  const idx = sorted.findIndex((a) => a.slug === slug);
+  const prev = idx > 0 ? sorted[idx - 1] : null;
+  const next = idx >= 0 && idx < sorted.length - 1 ? sorted[idx + 1] : null;
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-8 md:py-12">
