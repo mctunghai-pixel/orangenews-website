@@ -2,9 +2,9 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 7.1 — COMPLETE ✅ (article archive: per-day snapshots + 7-day RSS window + archive-aware /articles/[slug], shipped 2026-05-05)
+## Current phase: Phase 7.2 — COMPLETE ✅ (Resend double-opt-in subscribe + working forms on homepage and /newsletter, shipped 2026-05-06 as Phase 7.2.1)
 
-See `Phase 7.1 — COMPLETE` section below. Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7.2 reservation (subscribe layer) + Phase 7.1.x deferrals (date-filter UI, /category widening) listed at end.
+See `Phase 7.2 — COMPLETE` section below. Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7.3 reservation ("Шууд үзэх" video aggregation) + Phase 7.1.x deferrals (date-filter UI, /category widening) + Phase 7.2.x deferrals (admin CSV export, rate limiting) listed at end.
 
 ---
 
@@ -476,32 +476,32 @@ Notable differences between Plan B (drafted) and Plan C (shipped):
 
 ---
 
-### Phase 7.2 — Subscribe + admin layer (Day 6+)
-**Status:** RESERVED — UX placeholder shipped (honest disabled forms with `mailto:info@orangenews.mn` fallback), persistence pending.
+### Phase 7.2 — Subscribe + admin layer — ✅ COMPLETE (Day 6, shipped 2026-05-06 as Phase 7.2.1)
+**Status:** Resend double-opt-in subscribe flow shipped today. Both forms (homepage Newsletter section + `/newsletter` page) now capture real emails. Admin CSV export deferred to Phase 7.2.x — Resend dashboard's built-in CSV download covers the operator need in the meantime.
 
-**Goal:** capture homepage Newsletter form + `/newsletter` form emails for marketing communication.
+**Problem solved:** the homepage Newsletter section and `/newsletter` page both shipped as honest-disabled placeholder forms during Phase 6.2 (commit `68e5d53` was a hotfix from an earlier deceptive version that lacked a submit handler entirely). Users seeing "Тун удахгүй" had to fall back to `mailto:info@orangenews.mn`. Phase 7.2.1 replaces both with a real working subscribe flow backed by Resend Audiences.
 
-**Recommended stack:** [Resend](https://resend.com)
-- **Resend Audiences** = built-in mailing list (capture + send from one tool, no separate Mailchimp / Sendinblue / Brevo account)
-- Free tier: 3K emails/month, 100 contacts (sufficient for early-stage list)
-- Official Next 16 SDK (`resend` npm package) + `@react-email/components` for HTML email templates
+**Frontend (this repo, commit `d004bf3`):**
+- POST `/api/subscribe`: validate email → create pending Resend contact (`unsubscribed: true`) → send confirmation email with HMAC-signed verify link. Idempotent — repeat sign-ups re-send the confirm email rather than erroring.
+- GET `/api/subscribe/verify`: verify HMAC token → flip Resend contact to `unsubscribed: false` → 302 redirect to `/newsletter/confirmed?status=ok|invalid|error`.
+- `/newsletter/confirmed`: server component renders one of three Mongolian-Cyrillic copy blocks based on the status query (success / invalid token / error). Re-subscribe link on non-ok states.
+- `SubscribeForm` client component used by both surfaces with a `variant` prop — `dark` for the homepage section, `light` for the `/newsletter` page. State machine: `idle → submitting → ok|error`. Inline feedback, no toast library.
+- Token: HMAC-SHA256, secret = `RESEND_API_KEY` (server-only), 7-day TTL, `timingSafeEqual` comparison. Rotating the API key invalidates pending links — acceptable since they already expire in a week.
+- Email template: `src/emails/SubscribeConfirmEmail.tsx` via `@react-email/components`. Mongolian copy, no images, no tracking pixels — fresh sender domain deliverability.
 
-**Implementation steps:**
-1. `npm install resend @react-email/components`
-2. Create `src/app/api/subscribe/route.ts` Server Action — accept email, validate, call `resend.contacts.create({ audienceId, email })`
-3. Add double opt-in confirmation email (GDPR-friendly, also reduces spam/bot signups)
-4. Wire homepage `Newsletter.tsx` form + `/newsletter` page form to the new endpoint (un-disable inputs, add submit handler with loading + success state)
-5. Admin export: use Resend dashboard directly (CSV download), OR add `src/app/api/admin/subscribers/route.ts` with auth gate
-6. Set `RESEND_API_KEY` + `RESEND_AUDIENCE_ID` env vars in Vercel project settings
+**Vercel env vars (operator action, required before form actually works):**
+- `RESEND_API_KEY` (required) — from Resend dashboard → API Keys.
+- `RESEND_AUDIENCE_ID` (required) — UUID from Resend → Audiences.
+- `RESEND_FROM_EMAIL` (optional) — defaults to `Orange News <noreply@orangenews.mn>`. Override with `onboarding@resend.dev` if `orangenews.mn` not yet Resend-verified.
+- `NEXT_PUBLIC_SITE_URL` (optional) — falls back to request host.
 
-**Acceptance:**
-- Homepage form: enter email → "Confirmation email sent" inline feedback
-- User receives confirm email with verify link (double opt-in)
-- After confirm: contact appears in Resend Audience dashboard
-- Admin can export CSV via Resend UI or our admin endpoint
-- Both Newsletter.tsx + /newsletter page submit successfully (single endpoint, two surfaces)
+Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"` rather than crashing — verified locally during checkpoint.
 
-**Honest-UX hotfix shipped during Phase 6.2:** commit `68e5d53` — Newsletter.tsx form was silently deceptive (no submit handler, fake "Spam үгүй" copy implying it worked). Now matches the `/newsletter` page's Phase 4.4.6 disabled-form pattern. Phase 7.2 will un-disable both forms once backend persistence ships.
+**Verification:** local structural smoke (no env, option-b path per Block 2 prompt). All 5 page routes 200, POST validates JSON / missing-email / bad-email-format / valid-email-no-env (400 / 400 / 400 / 503), GET verify with no params 302s to `?status=invalid`. End-to-end Resend integration validated post-Vercel-deploy with real keys.
+
+**Deferred to Phase 7.2.x:**
+- **Admin CSV export endpoint** (`src/app/api/admin/subscribers/route.ts` with an auth gate). The Resend dashboard's built-in CSV download covers the operator need today; build the endpoint when we want exports surfaced in our own admin UI.
+- **Rate limiting** on `/api/subscribe`. Add Vercel edge config or a per-IP guard if abuse surfaces.
 
 ---
 
