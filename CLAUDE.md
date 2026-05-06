@@ -2,9 +2,34 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 7.3 — COMPLETE ✅ (live financial video feed: backend fetcher + 2-hour cron + homepage VideoFeed + /video archive route, shipped 2026-05-06)
+## Current phase: Day 11 sprint close — Phase 9.1 sales deck draft + Phase 6.1.5 Montsame scraper + production polish bundle (lint baseline cleared, DNS verified Hostinger-free, Slack secret-debug mystery diagnosed via canary), shipped 2026-05-06
 
-See `Phase 7.3 — COMPLETE` section below. Phase 8.1 (Track A Slack notifications, Track B delivered via Phase 6.1.5 Montsame scraper) + Phase 7.2 + Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7.1.x / 7.2.x / 7.3.x / 8.1.x deferrals listed at end of their respective COMPLETE blocks.
+See `Sprint to Commercialization` section below for the Day 1-11 timeline. Most recent COMPLETE blocks: Phase 9.1 (sales deck, `docs/sales_deck_draft.md`), Phase 6.1.5 (Montsame scraper, backend), Phase 7.3 (live video feed). Phase 8.1 (Track A Slack notifications shipped, Track B delivered via Phase 6.1.5 Montsame scraper) + Phase 7.2 + Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7.1.x / 7.2.x / 7.3.x / 8.1.x deferrals listed at end of their respective COMPLETE blocks.
+
+---
+
+## Sprint to Commercialization (Day 1-11)
+
+**Period:** Day 5 (2026-05-05) through Day 11 (continuing 2026-05-06). Multiple "Day N" sessions ran on the same calendar day under sprint cadence.
+
+| Day | Ship | Phase | Commits |
+|---|---|---|---|
+| 5 | Article archive system + readability CI fix | 7.1 | 8 |
+| 6 | Resend Subscribe + MSE mobile column hide + Phase 7.3 reservation | 7.2.1 + hotfix + 7.3 reservation | 7 |
+| 7 | Slack failure notifications across 3 production workflows | 8.1 Track A | 1 (deferred Track B) |
+| 8 | Live financial video feed end-to-end (backend + frontend + /video route) | 7.3 (5 checkpoints A-E) | 7 |
+| 9 | Montsame Mongolian scraper (Phase 8.1 Track B delivered) | 6.1.5 | 3 |
+| 10 | Azurise Solution sales deck draft (15 slides) | 9.1 | 1 |
+| 11 | Production polish — lint baseline (15 → 0), DNS Hostinger-free verification, Slack canary diagnosis, docs polish | T1-T5 | 1-3 |
+
+**Cumulative shipped:** ~30 production commits across both repos in 7 sprint sessions. Backend + frontend caught up on 4 deferred phases plus 1 net-new commercial artifact.
+
+**Carryover into Day 12+:**
+- `SLACK_WEBHOOK_URL` repo secret — Day 11 canary diagnosis confirmed GitHub API healthy; founder needs to re-run `gh secret set SLACK_WEBHOOK_URL --body "<url>" -R mctunghai-pixel/orange-news-automation` (verified working via TEST_CANARY round-trip).
+- `RESEND_API_KEY` + `RESEND_AUDIENCE_ID` Vercel env vars — Phase 7.2.1 Subscribe still 503 until set.
+- Phase 7.3.x bonus channel (Bloomberg News add-on), Phase 7.1.x date-filter UI, Phase 8.1.x email fallback — all documented as deferred under their respective COMPLETE blocks.
+
+**Sales deck founder review:** ~30 min; 9 [FOUNDER ADJUST] tags in `docs/sales_deck_draft.md` (pricing tiers, target customers, founder bio, etc.) before external sharing.
 
 ---
 
@@ -500,8 +525,10 @@ Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"`
 **Verification:** local structural smoke (no env, option-b path per Block 2 prompt). All 5 page routes 200, POST validates JSON / missing-email / bad-email-format / valid-email-no-env (400 / 400 / 400 / 503), GET verify with no params 302s to `?status=invalid`. End-to-end Resend integration validated post-Vercel-deploy with real keys.
 
 **Deferred to Phase 7.2.x:**
-- **Admin CSV export endpoint** (`src/app/api/admin/subscribers/route.ts` with an auth gate). The Resend dashboard's built-in CSV download covers the operator need today; build the endpoint when we want exports surfaced in our own admin UI.
-- **Rate limiting** on `/api/subscribe`. Add Vercel edge config or a per-IP guard if abuse surfaces.
+- **Admin CSV export endpoint** (`src/app/api/admin/subscribers/route.ts` with an auth gate) — **SKIP** per Day 10 founder approval; Resend dashboard's built-in CSV download covers the operator need indefinitely.
+- **Rate limiting** on `/api/subscribe` — still deferred. Add Vercel edge config or a per-IP guard if abuse surfaces.
+
+> Note: the Phase 9.1 sales deck (`docs/sales_deck_draft.md` slide 12) cites a redefined "Phase 7.2.2 — Customer self-service editorial layer (CMS for Tier-1 customers)" as a future commercial deliverable. That's a different scope from the legacy admin export skipped above; the slot label is reused but the content is reset for the commercialization roadmap.
 
 ---
 
