@@ -65,7 +65,7 @@ export function Header() {
           </nav>
         </div>
 
-        <a
+        <Link
           href="/"
           aria-label="Orange News нүүр"
           className="flex items-center gap-2"
@@ -74,7 +74,7 @@ export function Header() {
           <span className="font-serif-display text-[18px] md:text-[22px] font-bold tracking-tight">
             Orange News
           </span>
-        </a>
+        </Link>
 
         <div className="flex items-center justify-end gap-1 md:gap-4">
           <nav aria-label="Үндсэн цэс (баруун)" className="hidden md:flex items-center gap-5">

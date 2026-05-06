@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local archived copies of components (gitignored aside from name).
+    // Lint warnings here are about historical states we no longer ship.
+    "backups/**",
   ]),
 ]);
 

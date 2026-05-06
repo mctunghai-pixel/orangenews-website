@@ -82,7 +82,7 @@ export default function ContactPage() {
         >
           info@orangenews.mn
         </a>{" "}
-        хаягаар илгээнэ үү. Subject line-нд "Редакц" гэж тэмдэглээрэй.
+        хаягаар илгээнэ үү. Subject line-нд &quot;Редакц&quot; гэж тэмдэглээрэй.
       </p>
 
       <h3 className="mt-8 font-serif-display text-[18px] md:text-[22px] font-bold leading-tight">

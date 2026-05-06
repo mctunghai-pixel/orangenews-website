@@ -20,6 +20,14 @@ export function TickerBar({ items }: TickerBarProps) {
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
+    // SSR renders `null` → "--:--:--" placeholder (line ~49) with
+    // suppressHydrationWarning. On client mount, immediately sync to
+    // the real wall-clock time so the very first frame after hydration
+    // shows accurate seconds, then tick every 1s. The lint rule
+    // react-hooks/set-state-in-effect would normally flag the initial
+    // setNow as a "cascading render" — it is, but it's intentional and
+    // bounded (one extra render at mount, never again).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);

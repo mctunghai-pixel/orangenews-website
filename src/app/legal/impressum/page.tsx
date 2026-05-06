@@ -71,7 +71,7 @@ export default function ImpressumPage() {
         >
           info@orangenews.mn
         </a>{" "}
-        хаягаар илгээнэ үү. Subject line-нд "Хуулийн асуудал" гэж тэмдэглэсэн
+        хаягаар илгээнэ үү. Subject line-нд &quot;Хуулийн асуудал&quot; гэж тэмдэглэсэн
         байх.
       </p>
     </main>
