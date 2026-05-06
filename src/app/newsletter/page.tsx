@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { SubscribeForm } from "@/components/subscribe/SubscribeForm";
 
 export const metadata: Metadata = {
   title: "Товхимол — Orange News",
@@ -47,41 +48,12 @@ export default function NewsletterPage() {
         Бүртгүүлэх
       </h3>
       <p className="mt-4 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
-        Товхимолд бүртгүүлэх боломж тун удахгүй нээгдэнэ. Эхний уншигчдын тоонд
-        багтахыг хүсвэл{" "}
-        <a
-          href="mailto:info@orangenews.mn"
-          className="text-accent hover:underline"
-        >
-          info@orangenews.mn
-        </a>{" "}
-        хаягаар мэдэгдэнэ үү.
+        Имэйл хаягаа оруулаад баталгаажуулах товчийг дарна уу. Бид танд
+        баталгаажуулах холбоос бүхий имэйл илгээх бөгөөд та дотроос нь товчийг
+        дарж бүртгэлээ идэвхжүүлснээр өдрийн товхимолд бүртгэгдэнэ.
       </p>
 
-      <form
-        className="mt-6 flex flex-col gap-3 md:flex-row md:items-center"
-        aria-label="Newsletter signup (тун удахгүй)"
-      >
-        <input
-          type="email"
-          placeholder="имэйл хаяг"
-          disabled
-          aria-disabled="true"
-          className="flex-1 border border-border bg-foreground/[0.02] px-4 py-3 font-serif-body text-[14px] text-muted placeholder:text-muted/60 focus:outline-none cursor-not-allowed"
-        />
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          title="Тун удахгүй"
-          className="border border-border bg-foreground/[0.02] px-6 py-3 font-sans text-[12px] font-semibold uppercase tracking-wider text-muted cursor-not-allowed"
-        >
-          Бүртгүүлэх
-        </button>
-      </form>
-      <p className="mt-2 font-sans text-[11px] text-muted uppercase tracking-wider">
-        Тун удахгүй
-      </p>
+      <SubscribeForm variant="light" />
     </main>
   );
 }
