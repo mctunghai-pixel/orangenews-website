@@ -5,7 +5,7 @@ import { MarketSnapshot } from "@/components/home/MarketSnapshot";
 import { ArticleFeed } from "@/components/home/ArticleFeed";
 import { MostRead } from "@/components/home/MostRead";
 import { Newsletter } from "@/components/home/Newsletter";
-import { LiveEvent } from "@/components/home/LiveEvent";
+import { VideoFeed } from "@/components/home/VideoFeed";
 import { fetchOrangeNews } from "@/lib/fetch-orange-news";
 import { fetchMarketData } from "@/lib/fetch-market-data";
 import { fetchMseData } from "@/lib/fetch-mse-data";
@@ -87,7 +87,7 @@ export default async function Home() {
           <aside className="lg:col-span-4">
             <MostRead />
             <Newsletter />
-            <LiveEvent />
+            <VideoFeed />
           </aside>
         </div>
       </main>
