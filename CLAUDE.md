@@ -505,36 +505,65 @@ Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"`
 
 ---
 
-### Phase 7.3 — "Шууд үзэх" video aggregation (Day 7+)
-**Status:** RESERVED — feature requires architectural decisions before implementation. 4-6 hour fresh-mind session, not a hotfix.
+### Phase 7.3 — "Шууд үзэх" live financial video feed (Day 8+)
+**Status:** RESERVED — architectural decisions locked Day 6; implementation deferred to a 4-6 hour fresh-mind session.
 
-**Founder's request (Day 6):** the homepage "Шууд үзэх" section currently shows a hardcoded placeholder card (Fed press conference). Make it dynamic — surface real Live + Recent video content from major financial news channels, refreshed automatically.
+**Founder's request (Day 6):** the homepage "Шууд үзэх" section currently shows a hardcoded placeholder card (Fed press conference). Make it dynamic — surface curated video content from major financial news channels, refreshed automatically.
 
-**Open architectural decisions (lock before implementation):**
+**Locked decisions:**
 
-1. **Source strategy — YouTube Data API v3 vs YouTube RSS feeds.**
-   - **API:** real-time `liveBroadcastContent=live`, search by channel, full metadata. Quota: 10,000 units/day free tier; `search.list` = 100 units/call; `videos.list` = 1 unit/call. Polling cost is real.
-   - **RSS:** per-channel `https://www.youtube.com/feeds/videos.xml?channel_id=UCxxx`. Free, no quota, but no live-stream signal — only "recently uploaded" video metadata.
-   - **Hybrid:** RSS for the "Recent" feed (cheap), API for "Live" detection (expensive only when needed).
+1. **Source strategy — hybrid (Option γ).**
+   - YouTube Data API v3 for primary channels (free 10K units/day quota covers ~100 channel-fetches per day at 100 units each via `search.list`).
+   - YouTube RSS feeds (`https://www.youtube.com/feeds/videos.xml?channel_id=UCxxx`) for long-tail / fallback when API quota is constrained.
+   - Refresh cadence: every 2 hours via GHA cron.
 
-2. **Channel selection.** Founder mentioned Bloomberg / WSJ / Reuters / World Bank / FT. Need final list with channel IDs (UC...). Some have multiple channels (Bloomberg Television vs Bloomberg Markets vs Bloomberg Quicktake) — pick one each or aggregate?
+2. **Channel list (curated, locked):**
+   - Bloomberg (official YouTube — multiple shows; pick canonical channel during channel-ID curation step)
+   - WSJ
+   - Reuters Business
+   - World Bank (official)
+   - Financial Times
+   - CNBC
 
-3. **Editorial curation rules.** Auto-include everything? Score-rank by view count / recency / channel weight? Manually curate via an allowlist of video IDs? Filter out non-finance content (sports, politics-only, opinion)?
+3. **Editorial curation rules:**
+   - Topic relevance: Mongolia + global financial. Filter mechanism TBD (title/description keyword match vs LLM classifier vs manual curation).
+   - Quality bias: skip clips shorter than 3 minutes.
+   - Editorial veto: deny-list mechanism for specific video IDs (location TBD — likely a JSON config alongside the fetcher).
 
-4. **Auto-refresh cadence.** Live signal: every 5 min? 15 min? Recent feed: hourly? Daily? Cron path mirrors `mse_update.yml` — backend writes a JSON, frontend reads via raw GitHub URL with ISR.
+4. **UX:**
+   - Homepage "Шууд үзэх" section: 6-8 video cards (thumbnail + duration + title + channel badge).
+   - Dedicated `/video` route: full archive with filters (date / channel / topic — exact filter set TBD).
+   - "Watch on YouTube" click-out CTA. **No iframe embed** (page weight + autoplay + cookie + GDPR concerns).
+   - Mobile-friendly thumbnail grid; mirrors the existing card-grid patterns elsewhere in the app.
 
-5. **UX — embed vs link-out.** YouTube `<iframe>` embed in the section (heavier page weight, autoplay + cookie + GDPR concerns) vs thumbnail + click-out to youtube.com (lighter, less engagement).
+5. **Click-through analytics:** GA4 event or simple counter — final pick made during implementation depending on whether GA4 is wired into the project at that point.
 
 **Implementation surface (preliminary):**
-- Backend (`orange-news-automation`): new `youtube_fetcher.py` + new `.github/workflows/youtube_update.yml`. Writes `youtube_data.json` (or per-source files mirroring the archive pattern).
-- Frontend (this repo): new `lib/fetch-youtube.ts` consumer + types. Replace the hardcoded "Шууд үзэх" card on the homepage with a dynamic component reading from the live feed. Mock fallback similar to `fetch-orange-news.ts` for offline / fetch-failure states.
+- Backend (`orange-news-automation`): new `youtube_fetcher.py` + new `.github/workflows/youtube_update.yml` (2-hour cron). Writes `youtube_data.json` with curated video metadata. Deny-list lives alongside the fetcher as a JSON config.
+- Frontend (this repo): new `lib/fetch-youtube.ts` consumer + types. Replace the hardcoded "Шууд үзэх" homepage card with a dynamic component reading from the live feed. New `/video` route. Mock fallback similar to `fetch-orange-news.ts` for offline / fetch-failure states.
 
-**Acceptance (preliminary, refine when scope is locked):**
-- Homepage "Шууд үзэх" section shows real Live broadcast(s) when any tracked channel is live, falls back to most-recent video otherwise.
-- Video metadata refreshes within the chosen cadence without manual intervention.
-- No regression on existing homepage rendering when `youtube_data.json` is unavailable (mock fallback path).
+**Acceptance:**
+- 6+ fresh video cards visible on homepage "Шууд үзэх" section.
+- Auto-refresh confirmed via GHA cron logs (2-hour cadence).
+- Click-through analytics ready (GA4 event or counter increment).
+- Editorial veto mechanism functional (deny-listed video IDs do not appear).
+- `/video` route renders full archive with at least one filter dimension active.
+- No regression on existing homepage rendering when `youtube_data.json` is unavailable (mock fallback path holds).
 
-**DO NOT touch the "Шууд үзэх" section before the architectural decisions above are locked.** The current hardcoded card is the documented placeholder for this phase.
+**Estimated effort:** 4-6 hours fresh-mind session.
+
+**Prerequisites (operator action before implementation begins):**
+- YouTube Data API key (free, requires Google Cloud Console signup → enable YouTube Data API v3 → create API key → set as `YOUTUBE_API_KEY` env var in the backend repo + Vercel project settings if needed for any frontend-side fetches).
+- Channel ID curation (1-2 hour editorial pass — Bloomberg has multiple channels; pick canonical or aggregate).
+- Founder approval on the channel list (locked above is the starting point; can be revised pre-implementation).
+
+**Still TBD (refine when implementation begins):**
+- Mongolia-relevance detection mechanism (title/description keyword match vs LLM classifier vs manual curation).
+- Deny-list storage location (JSON file vs env var vs lightweight CMS).
+- `/video` route filter set (date / channel / topic — pick what users actually need, not what's possible).
+- Analytics tool choice (GA4 vs simple counter).
+
+**DO NOT touch the "Шууд үзэх" section before the prerequisites above are met and the implementation session begins.** The current hardcoded card is the documented placeholder for this phase.
 
 ---
 
