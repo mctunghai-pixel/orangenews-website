@@ -4,7 +4,7 @@
 
 ## Current phase: Phase 7.3 — COMPLETE ✅ (live financial video feed: backend fetcher + 2-hour cron + homepage VideoFeed + /video archive route, shipped 2026-05-06)
 
-See `Phase 7.3 — COMPLETE` section below. Phase 8.1 (Track A Slack notifications) + Phase 7.2 + Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.1.5 (Mongolian scrapers) / 6.3 / 6.4 remain backlog. Phase 7.1.x / 7.2.x / 7.3.x / 8.1.x deferrals listed at end of their respective COMPLETE blocks.
+See `Phase 7.3 — COMPLETE` section below. Phase 8.1 (Track A Slack notifications, Track B delivered via Phase 6.1.5 Montsame scraper) + Phase 7.2 + Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7.1.x / 7.2.x / 7.3.x / 8.1.x deferrals listed at end of their respective COMPLETE blocks.
 
 ---
 
@@ -547,7 +547,7 @@ Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"`
 ## Phase 8 — Observability + reliability
 
 ### Phase 8.1 — Track A SHIPPED ✅ (Slack failure notifications, Day 6 / 2026-05-06)
-**Status:** Slack-via-Incoming-Webhook notifications added to all 3 production GHA workflows (`orange_news.yml`, `mse_update.yml`, `market_watch_live.yml`). Track B (Mongolian RSS expansion) deferred to Phase 6.1.5 — recon found the Mongolian web doesn't expose public RSS broadly; scraper work required (see "Track B recon findings" below).
+**Status:** Slack-via-Incoming-Webhook notifications added to all 3 production GHA workflows (`orange_news.yml`, `mse_update.yml`, `market_watch_live.yml`). Track B (Mongolian content depth) **DELIVERED via Phase 6.1.5** Montsame HTML scraper, shipped 2026-05-06 (backend commit `20743e2`).
 
 **Problem solved:** Workflow failures had been silently degrading until the founder ran `gh run list` manually. Day 5's readability `ModuleNotFoundError` went 3 days undetected for exactly this reason. Slack push notification now gives sub-minute awareness with a clickable link to the failed run page.
 
@@ -561,17 +561,22 @@ Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"`
 2. Add the webhook URL as repo secret `SLACK_WEBHOOK_URL` at https://github.com/mctunghai-pixel/orange-news-automation/settings/secrets/actions.
 3. Verify by triggering `gh workflow run market_watch_live.yml` outside the 30-min staleness window — the predictable Phase 3 abort should fire a Slack notification within ~30 s of the run completing.
 
-**Track B (Mongolian RSS expansion) — DEFERRED to Phase 6.1.5:**
-Day 6-continuing recon found the Mongolian web does not expose RSS broadly. ikon.mn (already integrated as `category: "mongolia"`) appears to be the exception, not the rule:
+**Track B (Mongolian content depth) — ✅ DELIVERED via Phase 6.1.5 (Day 9, 2026-05-06, backend commit `20743e2`):**
 
-| Source | RSS probe result |
+The original Day 6 recon (preserved here for the historical record) found the Mongolian web does not expose RSS broadly:
+
+| Source | RSS probe result (Day 6) |
 |---|---|
 | montsame.mn | 404 across 6 candidate paths; no `<link rel="alternate" type="application/rss">` auto-discovery |
 | news.mn | TCP unreachable from this network (port 443/80 timeout — likely geo-block) |
 | gogo.mn / eagle.mn / shuud.mn / itoim.mn / medee.mn / baabar.mn | 404 / 503 / timeout |
 | zarig.mn | 200 but returns HTML (stale 2021 content), not RSS |
 
-The realistic path forward is **scrapers** — matches the pre-existing comment in `orange_rss_collector.py:62-64` flagging Phase 6.1.5 explicitly as scraper work. Estimated 2-4 hour focused session per source. Translator pipeline already supports native-Mongolian items via `process_mongolian_article` / `passthrough_mongolian` (see `orange_translator.py:1270+`); only the ingest side needs scraper engineering.
+Phase 6.1.5 implemented the scraper path:
+- New `montsame_scraper.py` in the backend repo — BeautifulSoup-based, two-category fan-in (Эдийн засаг `/mn/more/10` + Уул уурхай `/mn/more/16`), per-article body extraction via "longest `.content-mn` block" heuristic with `og:description` fallback. 3-attempt HTTP retry with exponential backoff, soft-fail at every layer.
+- `orange_rss_collector.py` integration hook calls `montsame_scraper.fetch_articles(limit=3)` after the 13 RSS feeds, sets `category="mongolia"` so the existing `passthrough_mongolian` translator route activates automatically (no translator changes needed).
+- Day 9 production validation (workflow run `25433197299`): 2 Montsame posts in the final 10-post output (Energy policy + Oyu Tolgoi mining), both with editorial-polished headlines in the 60-80 char range. Doubled Mongolian content depth vs the previous ikon.mn-only baseline.
+- Full schema + selector dependencies + maintenance playbook in `docs/montsame_phase6.1.5.md` (backend repo).
 
 **Deferred to Phase 8.1.x:**
 - **Email fallback** via Resend transactional (we have the SDK from Phase 7.2.1). Belt-and-suspenders for Slack outages.
