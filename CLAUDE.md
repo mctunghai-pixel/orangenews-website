@@ -506,28 +506,36 @@ Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"`
 ---
 
 ### Phase 7.3 — "Шууд үзэх" live financial video feed (Day 8+)
-**Status:** RESERVED — architectural decisions locked Day 6; implementation deferred to a 4-6 hour fresh-mind session.
+**Status:** RESERVED — architectural decisions locked Day 6; channel IDs + RSS schema validated Day 6 continuing recon (2026-05-06). Implementation deferred to a 4-6 hour fresh-mind session.
 
 **Founder's request (Day 6):** the homepage "Шууд үзэх" section currently shows a hardcoded placeholder card (Fed press conference). Make it dynamic — surface curated video content from major financial news channels, refreshed automatically.
 
 **Locked decisions:**
 
-1. **Source strategy — hybrid (Option γ).**
-   - YouTube Data API v3 for primary channels (free 10K units/day quota covers ~100 channel-fetches per day at 100 units each via `search.list`).
-   - YouTube RSS feeds (`https://www.youtube.com/feeds/videos.xml?channel_id=UCxxx`) for long-tail / fallback when API quota is constrained.
+1. **Source strategy — hybrid (Option γ), refined Day 6 continuing recon.**
+   - **YouTube RSS** (`https://www.youtube.com/feeds/videos.xml?channel_id=UCxxx`) for primary discovery — free, no quota, ~15 most-recent videos per channel.
+   - **YouTube Data API v3 `videos.list?part=contentDetails`** for per-video duration enrichment — needed because RSS does NOT expose video duration (locked decision #3 "skip <3 min" filter cannot be applied without it). Cost: 1 quota unit per video.
+   - **Daily quota cost:** ~1,080 units/day = ~10.8% of free 10K quota. Plenty of headroom. Avoid `search.list` (100 units/call) on the hot path; reserve for live-stream detection if added.
    - Refresh cadence: every 2 hours via GHA cron.
 
-2. **Channel list (curated, locked):**
-   - Bloomberg (official YouTube — multiple shows; pick canonical channel during channel-ID curation step)
-   - WSJ
-   - Reuters Business
-   - World Bank (official)
-   - Financial Times
-   - CNBC
+2. **Channel list (curated, channel IDs resolved Day 6 continuing recon):**
+
+   | Channel | UC ID |
+   |---|---|
+   | Bloomberg Television | `UCIALMKvObZNtJ6AmdCLP7Lg` |
+   | WSJ | `UCK7tptUDHh-RYDsdxO1-5QQ` |
+   | Reuters | `UChqUTb7kYRX8-EiaN3XFrSQ` |
+   | Financial Times | `UCoUxsWakJucWg46KW5RsvPw` |
+   | CNBC | `UCvJJ_dzjViJCoLf5uKUTwoA` |
+   | World Bank Group | `UCE9mrcoX-oE-2f1BL-iPPoQ` |
+
+   **Optional addition pending founder approval:** Bloomberg News (`UChirEOpgFCupRAk5etXqPaA`) — adds ~15 more entries/day with ~30% non-financial overlap.
+
+   **Bloomberg disambiguation:** the brand has 5+ channels on YouTube. Bloomberg Television (above) is the right pick for "live financial feed" intent. Bloomberg Originals (`UCUMZ7gohGI9HcU9VNsr2FJQ`, formerly @business) is long-form documentaries — exclude. Bloomberg Live (`UC7UFcUbAd8oyCBWCogVpJ6g`) is event/lifestyle content like "Summer Fun with Kyle Cooke" — exclude.
 
 3. **Editorial curation rules:**
    - Topic relevance: Mongolia + global financial. Filter mechanism TBD (title/description keyword match vs LLM classifier vs manual curation).
-   - Quality bias: skip clips shorter than 3 minutes.
+   - Quality bias: skip clips shorter than 3 minutes. **Requires API duration enrichment** (RSS does not expose duration — see source strategy above).
    - Editorial veto: deny-list mechanism for specific video IDs (location TBD — likely a JSON config alongside the fetcher).
 
 4. **UX:**
@@ -537,6 +545,13 @@ Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"`
    - Mobile-friendly thumbnail grid; mirrors the existing card-grid patterns elsewhere in the app.
 
 5. **Click-through analytics:** GA4 event or simple counter — final pick made during implementation depending on whether GA4 is wired into the project at that point.
+
+**Recon findings (Day 6 continuing, 2026-05-06):**
+- All 6 channels confirmed active via RSS — 15 most-recent entries each (YouTube RSS standard cap, ~900 unique videos/day max in the discovery pool before filtering).
+- **YouTube RSS has NO `duration` field.** Per-entry tags: `id, yt:videoId, yt:channelId, title, link, author, published, updated, media:title, media:content, media:thumbnail, media:description, media:community, media:starRating, media:statistics`. The "skip <3 min" rule needs a follow-up `videos.list` API call (1 unit each).
+- **API quota math is much more forgiving than originally feared.** Cheap-path discovery via `channels.list` (1 unit) + `playlistItems.list` (1 unit/page) + `videos.list` (1 unit/video) keeps total daily cost under 2K units even at the locked 2-hour cadence — plenty of headroom for the 10K free tier.
+- **RSS schema is rich:** thumbnails (`media:thumbnail`), full description (`media:description`), view count (`media:statistics`), star rating (`media:starRating`) all present — usable for the keyword-relevance filter and a popularity-rank fallback.
+- **Dead handles probed (do not re-probe):** `@bloombergmarkets`, `@bloombergquicktake`, `@bloombergpodcasts`, `@bloombergtelevision`, `@BloombergMarketsAndFinance`, `@bloombergnews` — all 404 in 2026-05-06 probe. Bloomberg restructured to use `@business` for the legacy main channel.
 
 **Implementation surface (preliminary):**
 - Backend (`orange-news-automation`): new `youtube_fetcher.py` + new `.github/workflows/youtube_update.yml` (2-hour cron). Writes `youtube_data.json` with curated video metadata. Deny-list lives alongside the fetcher as a JSON config.
@@ -550,18 +565,18 @@ Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"`
 - `/video` route renders full archive with at least one filter dimension active.
 - No regression on existing homepage rendering when `youtube_data.json` is unavailable (mock fallback path holds).
 
-**Estimated effort:** 4-6 hours fresh-mind session.
+**Estimated effort:** 4-6 hours fresh-mind session (channel-ID curation prerequisite is now DONE, saving the originally-planned 1-2 hours).
 
 **Prerequisites (operator action before implementation begins):**
-- YouTube Data API key (free, requires Google Cloud Console signup → enable YouTube Data API v3 → create API key → set as `YOUTUBE_API_KEY` env var in the backend repo + Vercel project settings if needed for any frontend-side fetches).
-- Channel ID curation (1-2 hour editorial pass — Bloomberg has multiple channels; pick canonical or aggregate).
-- Founder approval on the channel list (locked above is the starting point; can be revised pre-implementation).
+- ~~Channel ID curation (1-2 hour editorial pass)~~ ✅ done Day 6 continuing recon (table above).
+- **YouTube Data API key** — free, requires Google Cloud Console signup → enable YouTube Data API v3 → create API key → set as `YOUTUBE_API_KEY` env var in the backend repo's GitHub Actions secrets.
+- **Founder approval on the channel list** above + Bloomberg News add-on decision.
 
 **Still TBD (refine when implementation begins):**
-- Mongolia-relevance detection mechanism (title/description keyword match vs LLM classifier vs manual curation).
-- Deny-list storage location (JSON file vs env var vs lightweight CMS).
-- `/video` route filter set (date / channel / topic — pick what users actually need, not what's possible).
-- Analytics tool choice (GA4 vs simple counter).
+- **Mongolia-relevance filter semantics.** Spec reads "Mongolia + global financial" — interpret `+` as OR (include both kinds, weight Mongolia higher when present) vs AND (only items mentioning both — would yield ~0 results from these international channels). Recommend OR.
+- **Deny-list storage location** (JSON config alongside `youtube_fetcher.py` is simplest; matches existing patterns).
+- **`/video` route filter set** (date / channel / topic — recommend channel-filter-only for v1, smallest UI surface).
+- **Analytics tool choice** (GA4 vs simple counter — depends on whether GA4 is wired in by then).
 
 **DO NOT touch the "Шууд үзэх" section before the prerequisites above are met and the implementation session begins.** The current hardcoded card is the documented placeholder for this phase.
 
