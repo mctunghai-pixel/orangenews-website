@@ -13,7 +13,8 @@
 // applies the deny-list, so this consumer just slices the top N by recency.
 // =============================================================================
 
-import { ExternalLink, Radio } from "lucide-react";
+import Link from "next/link";
+import { Radio } from "lucide-react";
 import { fetchYouTube } from "@/lib/fetch-youtube";
 import type { YouTubeVideo } from "@/lib/types";
 
@@ -100,15 +101,12 @@ export async function VideoFeed() {
           <VideoCard key={v.id} video={v} />
         ))}
       </ol>
-      <a
-        href="https://www.youtube.com/"
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href="/video"
         className="mt-3 inline-flex items-center gap-1.5 font-sans text-[11px] md:text-[12px] font-semibold uppercase tracking-wider text-foreground hover:text-accent"
       >
-        YouTube-руу үсрэх
-        <ExternalLink className="h-3 w-3" aria-hidden />
-      </a>
+        Бүх видеог үзэх →
+      </Link>
       {source === "mock" && (
         <p className="mt-2 font-mono text-[10px] text-muted">
           Жагсаалт түр зуурын — амьд эх үүсвэртэй холбогдож чадсангүй.
