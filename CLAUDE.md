@@ -505,6 +505,39 @@ Notable differences between Plan B (drafted) and Plan C (shipped):
 
 ---
 
+### Phase 7.3 — "Шууд үзэх" video aggregation (Day 7+)
+**Status:** RESERVED — feature requires architectural decisions before implementation. 4-6 hour fresh-mind session, not a hotfix.
+
+**Founder's request (Day 6):** the homepage "Шууд үзэх" section currently shows a hardcoded placeholder card (Fed press conference). Make it dynamic — surface real Live + Recent video content from major financial news channels, refreshed automatically.
+
+**Open architectural decisions (lock before implementation):**
+
+1. **Source strategy — YouTube Data API v3 vs YouTube RSS feeds.**
+   - **API:** real-time `liveBroadcastContent=live`, search by channel, full metadata. Quota: 10,000 units/day free tier; `search.list` = 100 units/call; `videos.list` = 1 unit/call. Polling cost is real.
+   - **RSS:** per-channel `https://www.youtube.com/feeds/videos.xml?channel_id=UCxxx`. Free, no quota, but no live-stream signal — only "recently uploaded" video metadata.
+   - **Hybrid:** RSS for the "Recent" feed (cheap), API for "Live" detection (expensive only when needed).
+
+2. **Channel selection.** Founder mentioned Bloomberg / WSJ / Reuters / World Bank / FT. Need final list with channel IDs (UC...). Some have multiple channels (Bloomberg Television vs Bloomberg Markets vs Bloomberg Quicktake) — pick one each or aggregate?
+
+3. **Editorial curation rules.** Auto-include everything? Score-rank by view count / recency / channel weight? Manually curate via an allowlist of video IDs? Filter out non-finance content (sports, politics-only, opinion)?
+
+4. **Auto-refresh cadence.** Live signal: every 5 min? 15 min? Recent feed: hourly? Daily? Cron path mirrors `mse_update.yml` — backend writes a JSON, frontend reads via raw GitHub URL with ISR.
+
+5. **UX — embed vs link-out.** YouTube `<iframe>` embed in the section (heavier page weight, autoplay + cookie + GDPR concerns) vs thumbnail + click-out to youtube.com (lighter, less engagement).
+
+**Implementation surface (preliminary):**
+- Backend (`orange-news-automation`): new `youtube_fetcher.py` + new `.github/workflows/youtube_update.yml`. Writes `youtube_data.json` (or per-source files mirroring the archive pattern).
+- Frontend (this repo): new `lib/fetch-youtube.ts` consumer + types. Replace the hardcoded "Шууд үзэх" card on the homepage with a dynamic component reading from the live feed. Mock fallback similar to `fetch-orange-news.ts` for offline / fetch-failure states.
+
+**Acceptance (preliminary, refine when scope is locked):**
+- Homepage "Шууд үзэх" section shows real Live broadcast(s) when any tracked channel is live, falls back to most-recent video otherwise.
+- Video metadata refreshes within the chosen cadence without manual intervention.
+- No regression on existing homepage rendering when `youtube_data.json` is unavailable (mock fallback path).
+
+**DO NOT touch the "Шууд үзэх" section before the architectural decisions above are locked.** The current hardcoded card is the documented placeholder for this phase.
+
+---
+
 ## Completed phases
 
 ### Phase 3 — COMPLETE ✅
