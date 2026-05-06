@@ -23,7 +23,7 @@ export function MseTop20Members({ rows }: Props) {
             <th className={`${TH_BASE} text-right`}>#</th>
             <th className={`${TH_BASE} text-left`}>Ticker</th>
             <th className={`${TH_BASE} text-left`}>Name</th>
-            <th className={`${TH_BASE} text-right`}>Code</th>
+            <th className={`${TH_BASE} text-right hidden md:table-cell`}>Code</th>
             <th className={`${TH_BASE} text-right`}>Price</th>
           </tr>
         </thead>
@@ -40,7 +40,7 @@ export function MseTop20Members({ rows }: Props) {
               <td className="px-4 py-2.5 text-left font-serif-body text-foreground">
                 {r.name}
               </td>
-              <td className={TD_NUM}>{r.code}</td>
+              <td className={`${TD_NUM} hidden md:table-cell`}>{r.code}</td>
               <td className={TD_NUM}>
                 {r.price != null ? PRICE_FMT.format(r.price) : "—"}
               </td>
