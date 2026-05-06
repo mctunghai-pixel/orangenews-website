@@ -2,9 +2,11 @@
 
 # Orange News Website — Project State
 
-## Current phase: Day 11 sprint close — Phase 9.1 sales deck draft + Phase 6.1.5 Montsame scraper + production polish bundle (lint baseline cleared, DNS verified Hostinger-free, Slack secret-debug mystery diagnosed via canary), shipped 2026-05-06
+## Current phase: 🎯 Sprint Day 14 — COMPLETE ✅ Production-grade Bloomberg-grade Mongolian financial portal + full sales infrastructure. Ready for first commercial customer onboarding. (Master plan: Foundation → Commercialization)
 
-See `Sprint to Commercialization` section below for the Day 1-11 timeline. Most recent COMPLETE blocks: Phase 9.1 (sales deck, `docs/sales_deck_draft.md`), Phase 6.1.5 (Montsame scraper, backend), Phase 7.3 (live video feed). Phase 8.1 (Track A Slack notifications shipped, Track B delivered via Phase 6.1.5 Montsame scraper) + Phase 7.2 + Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7.1.x / 7.2.x / 7.3.x / 8.1.x deferrals listed at end of their respective COMPLETE blocks.
+Sprint Day 5-14 (executed 2026-05-05 → 2026-05-06 across multiple sessions per calendar day). 6 final commercialization deliverables shipped Day 14 in `docs/sales/`: live demo script, technical FAQ, customer onboarding checklist, customer success metrics, strategic positioning brief, and the comprehensive sprint retrospective (`docs/sales/sprint_retrospective.md`).
+
+See `Sprint to Commercialization` section below for the full Day 5-14 timeline. Most recent COMPLETE blocks: Phase 9.3 (demo preparation, Day 14), Phase 9.2 (customer outreach kit, Day 12), Phase 9.1 (sales deck, Day 10), Phase 6.1.5 (Montsame scraper, Day 9), Phase 7.3 (live video feed, Day 8). Phase 8.1 (Track A Slack notifications shipped, Track B delivered via Phase 6.1.5) + Phase 7.2 + Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7.1.x / 7.2.x / 7.3.x / 8.1.x deferrals listed at end of their respective COMPLETE blocks.
 
 ---
 
@@ -21,15 +23,35 @@ See `Sprint to Commercialization` section below for the Day 1-11 timeline. Most 
 | 9 | Montsame Mongolian scraper (Phase 8.1 Track B delivered) | 6.1.5 | 3 |
 | 10 | Azurise Solution sales deck draft (15 slides) | 9.1 | 1 |
 | 11 | Production polish — lint baseline (15 → 0), DNS Hostinger-free verification, Slack canary diagnosis, docs polish | T1-T5 | 1-3 |
+| 12 | Customer outreach kit — 5 deliverables in `docs/sales/` (target list, email templates, demo scheduling, one-pager, pricing model) | 9.2 | 2 |
+| 13 | Founder review session — engineer standby; activations attempted | (founder day) | 0 |
+| 14 | Demo preparation — 6 final deliverables in `docs/sales/` (live demo script, tech FAQ, onboarding checklist, success metrics, positioning brief, sprint retrospective) | 9.3 | 1 |
 
-**Cumulative shipped:** ~30 production commits across both repos in 7 sprint sessions. Backend + frontend caught up on 4 deferred phases plus 1 net-new commercial artifact.
+**Sprint cumulative:** ~36 production commits across both repos over 9 engineer-execution sessions + 1 founder review session. 5 product phase ships + 3 commercialization-artifact ships. 0 production downtime incidents.
 
-**Carryover into Day 12+:**
-- `SLACK_WEBHOOK_URL` repo secret — Day 11 canary diagnosis confirmed GitHub API healthy; founder needs to re-run `gh secret set SLACK_WEBHOOK_URL --body "<url>" -R mctunghai-pixel/orange-news-automation` (verified working via TEST_CANARY round-trip).
+**Sprint COMPLETE post-state:** ready for first commercial customer onboarding. Founder review queue (~3-3.5 hours) outlined in `docs/sales/sprint_retrospective.md`.
+
+**Outstanding founder activations (decoupled from sprint completion):**
+- `SLACK_WEBHOOK_URL` repo secret — Day 11 canary diagnosis confirmed GitHub API healthy; founder retries the verified one-liner from any cwd: `gh secret set SLACK_WEBHOOK_URL --body "<webhook>" -R mctunghai-pixel/orange-news-automation`.
 - `RESEND_API_KEY` + `RESEND_AUDIENCE_ID` Vercel env vars — Phase 7.2.1 Subscribe still 503 until set.
-- Phase 7.3.x bonus channel (Bloomberg News add-on), Phase 7.1.x date-filter UI, Phase 8.1.x email fallback — all documented as deferred under their respective COMPLETE blocks.
+- FB Page token migration to long-lived System User token (Day 13 spec; ~30-day buffer remaining before original token expiry).
+- Hostinger cancellation (DNS verified safe Day 11).
 
-**Sales deck founder review:** ~30 min; 9 [FOUNDER ADJUST] tags in `docs/sales_deck_draft.md` (pricing tiers, target customers, founder bio, etc.) before external sharing.
+**Sales-artifact founder review queue (per Day 14 retrospective):**
+- `sales_deck_draft.md` (Day 10) — 9 `[FOUNDER ADJUST]` tags, ~30 min
+- `customer_target_list.md` (Day 12) — 33 named-contact tags, ~30-45 min
+- `outreach_email_templates.md` (Day 12) — 3 register tags, ~10 min
+- `demo_scheduling_template.md` (Day 12) — 1 tag, ~5 min
+- `one_pager_executive_summary.md` (Day 12) — 4 tags, ~10 min
+- `pricing_model_spreadsheet.md` (Day 12) — 16 critical pricing tags, ~30-45 min
+- `live_demo_script.md` (Day 14) — 4 tags, ~10 min
+- `technical_faq.md` (Day 14) — 2 tags, ~10 min
+- `customer_onboarding_checklist.md` (Day 14) — 4 tags, ~10 min
+- `customer_success_metrics.md` (Day 14) — 4 tags, ~5 min
+- `strategic_positioning_brief.md` (Day 14) — 4 tags, ~15 min
+- `sprint_retrospective.md` (Day 14) — 4 tags, ~10 min
+
+**Engineering deferrals** (Phase 7.1.x date-filter UI, Phase 7.3.x Bloomberg News bonus channel, Phase 8.1.x email fallback, Phase 9.2 multi-tenant for second customer, Phase 7.2.2 customer-CMS for editorial review) all documented under their respective COMPLETE blocks.
 
 ---
 
