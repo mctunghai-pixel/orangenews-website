@@ -2,9 +2,9 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 7.2 — COMPLETE ✅ (Resend double-opt-in subscribe + working forms on homepage and /newsletter, shipped 2026-05-06 as Phase 7.2.1)
+## Current phase: Phase 8.1 — Track A SHIPPED ✅ (Slack failure notifications on all 3 GHA workflows, shipped 2026-05-06; Track B Mongolian RSS expansion deferred to Phase 6.1.5 scrapers per probe findings)
 
-See `Phase 7.2 — COMPLETE` section below. Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.3 / 6.4 remain backlog. Phase 7.3 reservation ("Шууд үзэх" video aggregation) + Phase 7.1.x deferrals (date-filter UI, /category widening) + Phase 7.2.x deferrals (admin CSV export, rate limiting) listed at end.
+See `Phase 8.1 — Track A SHIPPED` section below. Phase 7.2 + Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.1.5 (Mongolian scrapers) / 6.3 / 6.4 remain backlog. Phase 7.3 reservation ("Шууд үзэх" video aggregation) + Phase 7.1.x deferrals (date-filter UI, /category widening) + Phase 7.2.x deferrals (admin CSV export, rate limiting) + Phase 8.1.x deferrals (email fallback, paging) listed at end.
 
 ---
 
@@ -564,6 +564,42 @@ Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"`
 - Analytics tool choice (GA4 vs simple counter).
 
 **DO NOT touch the "Шууд үзэх" section before the prerequisites above are met and the implementation session begins.** The current hardcoded card is the documented placeholder for this phase.
+
+---
+
+## Phase 8 — Observability + reliability
+
+### Phase 8.1 — Track A SHIPPED ✅ (Slack failure notifications, Day 6 / 2026-05-06)
+**Status:** Slack-via-Incoming-Webhook notifications added to all 3 production GHA workflows (`orange_news.yml`, `mse_update.yml`, `market_watch_live.yml`). Track B (Mongolian RSS expansion) deferred to Phase 6.1.5 — recon found the Mongolian web doesn't expose public RSS broadly; scraper work required (see "Track B recon findings" below).
+
+**Problem solved:** Workflow failures had been silently degrading until the founder ran `gh run list` manually. Day 5's readability `ModuleNotFoundError` went 3 days undetected for exactly this reason. Slack push notification now gives sub-minute awareness with a clickable link to the failed run page.
+
+**Backend (`orange-news-automation`, commit `6220780`):**
+- Identical 16-line `Notify Slack on failure` step appended to each of the 3 workflows, gated on `if: failure()` and using the `8398a7/action-slack@v3` action.
+- Message payload: workflow name + direct link to the failed run (`https://github.com/.../actions/runs/{id}`) + trigger type. Founder taps the Slack push and lands directly on the failed run.
+- Phase 1.5 `continue-on-error: true` semantics preserved — `market_data_fetcher.py` failures are tolerated by design (the translator has its own fallback) and intentionally do not trigger notifications.
+
+**Operator follow-up (required before notifications fire):**
+1. Create Slack Incoming Webhook → https://api.slack.com/messaging/webhooks (target alerting channel of choice).
+2. Add the webhook URL as repo secret `SLACK_WEBHOOK_URL` at https://github.com/mctunghai-pixel/orange-news-automation/settings/secrets/actions.
+3. Verify by triggering `gh workflow run market_watch_live.yml` outside the 30-min staleness window — the predictable Phase 3 abort should fire a Slack notification within ~30 s of the run completing.
+
+**Track B (Mongolian RSS expansion) — DEFERRED to Phase 6.1.5:**
+Day 6-continuing recon found the Mongolian web does not expose RSS broadly. ikon.mn (already integrated as `category: "mongolia"`) appears to be the exception, not the rule:
+
+| Source | RSS probe result |
+|---|---|
+| montsame.mn | 404 across 6 candidate paths; no `<link rel="alternate" type="application/rss">` auto-discovery |
+| news.mn | TCP unreachable from this network (port 443/80 timeout — likely geo-block) |
+| gogo.mn / eagle.mn / shuud.mn / itoim.mn / medee.mn / baabar.mn | 404 / 503 / timeout |
+| zarig.mn | 200 but returns HTML (stale 2021 content), not RSS |
+
+The realistic path forward is **scrapers** — matches the pre-existing comment in `orange_rss_collector.py:62-64` flagging Phase 6.1.5 explicitly as scraper work. Estimated 2-4 hour focused session per source. Translator pipeline already supports native-Mongolian items via `process_mongolian_article` / `passthrough_mongolian` (see `orange_translator.py:1270+`); only the ingest side needs scraper engineering.
+
+**Deferred to Phase 8.1.x:**
+- **Email fallback** via Resend transactional (we have the SDK from Phase 7.2.1). Belt-and-suspenders for Slack outages.
+- **Paging escalation** for repeat failures (e.g., 3 failures in 24h triggers a stronger alert).
+- **`continue-on-error` step soft-warnings** if tolerated failures become a reliability concern.
 
 ---
 
