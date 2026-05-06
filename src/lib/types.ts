@@ -263,3 +263,73 @@ export interface MseDataResult {
   errors?: string[];       // per-dataset failures from backend
   error?: string;          // frontend fetch error (mock-fallback reason)
 }
+
+// -----------------------------------------------------------------------------
+// 6. YouTube video feed types — Phase 7.3 backend
+// -----------------------------------------------------------------------------
+// Backend (`youtube_fetcher.py`) writes youtube_data.json every 2 hours from
+// 6 curated channels (Bloomberg Television, WSJ, Reuters, Financial Times,
+// CNBC, World Bank Group). Hybrid γ source strategy: RSS for discovery +
+// YouTube Data API v3 videos.list for duration enrichment.
+//
+// Field names normalized at the boundary in fetch-youtube.ts:
+//   channel_id     → channelId       | channel_title  → channelTitle
+//   published_at   → publishedAt     | thumbnail_url  → thumbnailUrl
+//   duration_seconds → durationSeconds | duration_iso → durationIso
+//   watch_url      → watchUrl        | mongolia_relevant → mongoliaRelevant
+// -----------------------------------------------------------------------------
+
+/** Raw per-video shape from youtube_data.json (snake_case mirror of backend output). */
+export interface RawYouTubeVideo {
+  id: string;
+  title: string;
+  description: string;
+  channel_id: string;
+  channel_title: string;
+  published_at: string;       // ISO 8601 from backend (RSS-sourced)
+  thumbnail_url: string | null;
+  duration_seconds: number;
+  duration_iso: string;
+  watch_url: string;
+  mongolia_relevant: boolean;
+}
+
+/** Raw envelope written by the backend fetcher. */
+export interface RawYouTubeData {
+  fetched_at_utc: string;
+  fetched_at_mnt: string;
+  channels_processed: number;
+  videos_total: number;
+  videos_filtered_short: number;
+  videos_filtered_denied: number;
+  videos_filtered_no_duration: number;
+  errors: string[];
+  elapsed_seconds: number;
+  videos: RawYouTubeVideo[];
+}
+
+/** Normalized per-video shape consumed by the frontend. */
+export interface YouTubeVideo {
+  id: string;
+  title: string;
+  description: string;
+  channelId: string;
+  channelTitle: string;
+  publishedAt: Date;
+  thumbnailUrl: string | null;
+  durationSeconds: number;
+  durationIso: string;
+  watchUrl: string;
+  mongoliaRelevant: boolean;
+}
+
+/** Aggregate fetcher result (mirrors FetchOrangeNewsResult envelope). */
+export interface FetchYouTubeResult {
+  videos: YouTubeVideo[];
+  source: "live" | "mock";
+  fetchedAt: Date;
+  fetchedAtMnt?: string;       // ISO 8601 +08:00 from backend
+  channelsProcessed?: number;  // backend operator visibility
+  errors?: string[];           // per-channel failures from backend
+  error?: string;              // frontend fetch error (mock-fallback reason)
+}
