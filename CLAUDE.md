@@ -2,9 +2,9 @@
 
 # Orange News Website — Project State
 
-## Current phase: Phase 8.1 — Track A SHIPPED ✅ (Slack failure notifications on all 3 GHA workflows, shipped 2026-05-06; Track B Mongolian RSS expansion deferred to Phase 6.1.5 scrapers per probe findings)
+## Current phase: Phase 7.3 — COMPLETE ✅ (live financial video feed: backend fetcher + 2-hour cron + homepage VideoFeed + /video archive route, shipped 2026-05-06)
 
-See `Phase 8.1 — Track A SHIPPED` section below. Phase 7.2 + Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.1.5 (Mongolian scrapers) / 6.3 / 6.4 remain backlog. Phase 7.3 reservation ("Шууд үзэх" video aggregation) + Phase 7.1.x deferrals (date-filter UI, /category widening) + Phase 7.2.x deferrals (admin CSV export, rate limiting) + Phase 8.1.x deferrals (email fallback, paging) listed at end.
+See `Phase 7.3 — COMPLETE` section below. Phase 8.1 (Track A Slack notifications) + Phase 7.2 + Phase 7.1 + Phase 6.2 + Phase 5 + Phase 4 retained as reference. Phase 6.1 / 6.1.5 (Mongolian scrapers) / 6.3 / 6.4 remain backlog. Phase 7.1.x / 7.2.x / 7.3.x / 8.1.x deferrals listed at end of their respective COMPLETE blocks.
 
 ---
 
@@ -505,80 +505,42 @@ Without env vars set, POST returns HTTP 503 `"Subscribe service not configured"`
 
 ---
 
-### Phase 7.3 — "Шууд үзэх" live financial video feed (Day 8+)
-**Status:** RESERVED — architectural decisions locked Day 6; channel IDs + RSS schema validated Day 6 continuing recon (2026-05-06). Implementation deferred to a 4-6 hour fresh-mind session.
+### Phase 7.3 — "Шууд үзэх" live financial video feed — ✅ COMPLETE (shipped 2026-05-06)
+**Status:** Hybrid γ source strategy live in production. Backend writes `youtube_data.json` every 2 hours from 6 curated YouTube channels; frontend renders the homepage right-rail VideoFeed (6 cards) + dedicated `/video` archive route (responsive grid with channel filter). Shipped end-to-end across 5 checkpoints (A → E) in a single session.
 
-**Founder's request (Day 6):** the homepage "Шууд үзэх" section currently shows a hardcoded placeholder card (Fed press conference). Make it dynamic — surface curated video content from major financial news channels, refreshed automatically.
+**Problem solved:** the homepage "Шууд үзэх" section shipped during Phase 4/5 as a single hardcoded `LiveEvent` card pointing at a static "Powell live press conference" with no submit handler. Phase 7.3 replaces it with a curated, auto-refreshed feed from Bloomberg Television, WSJ, Reuters, Financial Times, CNBC, and World Bank Group.
 
-**Locked decisions:**
+**Backend (`orange-news-automation`, commit `a7a033a` + bot commit `0def059`):**
+- `youtube_fetcher.py` — feedparser RSS discovery for the 6 channels + single `videos.list?part=contentDetails` API call (batched up to 50 IDs) for duration enrichment. RSS does not expose duration; without the enrichment the `>3 min` quality filter can't be applied. Soft-fails per channel with errors[] (matches `mse_data_fetcher.py` pattern). Mongolia-relevance is a boost flag (locked decision #3 OR semantics), never an exclusion.
+- `.github/workflows/youtube_update.yml` — cron `0 */2 * * *`, ~30 s typical run, includes the Phase 8.1 Track A Slack notification step (gated on `SLACK_WEBHOOK_URL`).
+- `deny_list_videos.json` — empty array seed; edit + commit to veto specific video IDs from the feed without code changes.
+- `.gitignore` allowlist: `!youtube_data.json` + `!deny_list_videos.json` (without these the backend writes would have been silently dropped — same lesson as Phase 7.1's `!archive/`).
+- See `docs/youtube_phase7.3.md` in the backend repo for the full schema + operator reference.
 
-1. **Source strategy — hybrid (Option γ), refined Day 6 continuing recon.**
-   - **YouTube RSS** (`https://www.youtube.com/feeds/videos.xml?channel_id=UCxxx`) for primary discovery — free, no quota, ~15 most-recent videos per channel.
-   - **YouTube Data API v3 `videos.list?part=contentDetails`** for per-video duration enrichment — needed because RSS does NOT expose video duration (locked decision #3 "skip <3 min" filter cannot be applied without it). Cost: 1 quota unit per video.
-   - **Daily quota cost:** ~1,080 units/day = ~10.8% of free 10K quota. Plenty of headroom. Avoid `search.list` (100 units/call) on the hot path; reserve for live-stream detection if added.
-   - Refresh cadence: every 2 hours via GHA cron.
+**Frontend (this repo, commits `319a0ce` (B) → `fe2cf41` (C) → `5eaaf47` (D)):**
+- `lib/fetch-youtube.ts` + types — `RawYouTubeVideo` (snake_case mirror) → `YouTubeVideo` (camelCase normalized). `FetchYouTubeResult` envelope mirrors the existing fetchers (`source: "live" | "mock"` + `fetchedAt` + operator visibility). ISR 1800 s.
+- `lib/mock-youtube-data.ts` — 6 entries balanced across 3 channels for graceful fallback; 1 entry exercises the `mongoliaRelevant` boost flag.
+- `components/home/VideoFeed.tsx` — replaces the deleted `LiveEvent` placeholder. Stack of 6 video cards (16:9 thumbnail with duration pill overlay, channel badge, optional МОНГОЛ accent, 2-line clamped title) in the homepage right-rail aside. Source-aware mock indicator. "Бүх видеог үзэх →" footer link to `/video`.
+- `app/video/page.tsx` — full archive view, server-side `?channel=UC...` filter (locked decision #4 channel-only for v1), 1/2/3-column responsive grid, derived chip list with active state. Empty state with escape-hatch link back to all-view when a channel returns 0 videos.
+- `LiveEvent.tsx` + Powell hardcode deleted.
 
-2. **Channel list (curated, channel IDs resolved Day 6 continuing recon):**
+**Verification (production, run `25429250756`):**
+- Workflow: SUCCESS in 27 s, 0 errors. `youtube_data.json` published with 33 surviving videos (90 RSS stubs → 53 short, 4 no-duration, 0 deny-listed, 33 surviving). Channel distribution: Bloomberg Television 13, CNBC 12, World Bank Group 6, WSJ 1, FT 1, Reuters 0.
+- Frontend: `/video` renders 33 thumbnails in default view; `/video?channel=UCIALMKvObZNtJ6AmdCLP7Lg` renders exactly 13 thumbnails — filter logic is an exact match with the backend's known channel distribution.
 
-   | Channel | UC ID |
-   |---|---|
-   | Bloomberg Television | `UCIALMKvObZNtJ6AmdCLP7Lg` |
-   | WSJ | `UCK7tptUDHh-RYDsdxO1-5QQ` |
-   | Reuters | `UChqUTb7kYRX8-EiaN3XFrSQ` |
-   | Financial Times | `UCoUxsWakJucWg46KW5RsvPw` |
-   | CNBC | `UCvJJ_dzjViJCoLf5uKUTwoA` |
-   | World Bank Group | `UCE9mrcoX-oE-2f1BL-iPPoQ` |
+**Quota actual vs estimate:**
+- Reservation estimated ~1,080 units/day (per-video cost model).
+- Reality: ~24 units/day (per-call cost model — `videos.list` charges per call, not per ID).
+- ~0.24% of free 10K quota → massive headroom for future expansion (more channels, higher cadence, additional API features).
 
-   **Optional addition pending founder approval:** Bloomberg News (`UChirEOpgFCupRAk5etXqPaA`) — adds ~15 more entries/day with ~30% non-financial overlap.
-
-   **Bloomberg disambiguation:** the brand has 5+ channels on YouTube. Bloomberg Television (above) is the right pick for "live financial feed" intent. Bloomberg Originals (`UCUMZ7gohGI9HcU9VNsr2FJQ`, formerly @business) is long-form documentaries — exclude. Bloomberg Live (`UC7UFcUbAd8oyCBWCogVpJ6g`) is event/lifestyle content like "Summer Fun with Kyle Cooke" — exclude.
-
-3. **Editorial curation rules:**
-   - Topic relevance: Mongolia + global financial. Filter mechanism TBD (title/description keyword match vs LLM classifier vs manual curation).
-   - Quality bias: skip clips shorter than 3 minutes. **Requires API duration enrichment** (RSS does not expose duration — see source strategy above).
-   - Editorial veto: deny-list mechanism for specific video IDs (location TBD — likely a JSON config alongside the fetcher).
-
-4. **UX:**
-   - Homepage "Шууд үзэх" section: 6-8 video cards (thumbnail + duration + title + channel badge).
-   - Dedicated `/video` route: full archive with filters (date / channel / topic — exact filter set TBD).
-   - "Watch on YouTube" click-out CTA. **No iframe embed** (page weight + autoplay + cookie + GDPR concerns).
-   - Mobile-friendly thumbnail grid; mirrors the existing card-grid patterns elsewhere in the app.
-
-5. **Click-through analytics:** GA4 event or simple counter — final pick made during implementation depending on whether GA4 is wired into the project at that point.
-
-**Recon findings (Day 6 continuing, 2026-05-06):**
-- All 6 channels confirmed active via RSS — 15 most-recent entries each (YouTube RSS standard cap, ~900 unique videos/day max in the discovery pool before filtering).
-- **YouTube RSS has NO `duration` field.** Per-entry tags: `id, yt:videoId, yt:channelId, title, link, author, published, updated, media:title, media:content, media:thumbnail, media:description, media:community, media:starRating, media:statistics`. The "skip <3 min" rule needs a follow-up `videos.list` API call (1 unit each).
-- **API quota math is much more forgiving than originally feared.** Cheap-path discovery via `channels.list` (1 unit) + `playlistItems.list` (1 unit/page) + `videos.list` (1 unit/video) keeps total daily cost under 2K units even at the locked 2-hour cadence — plenty of headroom for the 10K free tier.
-- **RSS schema is rich:** thumbnails (`media:thumbnail`), full description (`media:description`), view count (`media:statistics`), star rating (`media:starRating`) all present — usable for the keyword-relevance filter and a popularity-rank fallback.
-- **Dead handles probed (do not re-probe):** `@bloombergmarkets`, `@bloombergquicktake`, `@bloombergpodcasts`, `@bloombergtelevision`, `@BloombergMarketsAndFinance`, `@bloombergnews` — all 404 in 2026-05-06 probe. Bloomberg restructured to use `@business` for the legacy main channel.
-
-**Implementation surface (preliminary):**
-- Backend (`orange-news-automation`): new `youtube_fetcher.py` + new `.github/workflows/youtube_update.yml` (2-hour cron). Writes `youtube_data.json` with curated video metadata. Deny-list lives alongside the fetcher as a JSON config.
-- Frontend (this repo): new `lib/fetch-youtube.ts` consumer + types. Replace the hardcoded "Шууд үзэх" homepage card with a dynamic component reading from the live feed. New `/video` route. Mock fallback similar to `fetch-orange-news.ts` for offline / fetch-failure states.
-
-**Acceptance:**
-- 6+ fresh video cards visible on homepage "Шууд үзэх" section.
-- Auto-refresh confirmed via GHA cron logs (2-hour cadence).
-- Click-through analytics ready (GA4 event or counter increment).
-- Editorial veto mechanism functional (deny-listed video IDs do not appear).
-- `/video` route renders full archive with at least one filter dimension active.
-- No regression on existing homepage rendering when `youtube_data.json` is unavailable (mock fallback path holds).
-
-**Estimated effort:** 4-6 hours fresh-mind session (channel-ID curation prerequisite is now DONE, saving the originally-planned 1-2 hours).
-
-**Prerequisites (operator action before implementation begins):**
-- ~~Channel ID curation (1-2 hour editorial pass)~~ ✅ done Day 6 continuing recon (table above).
-- **YouTube Data API key** — free, requires Google Cloud Console signup → enable YouTube Data API v3 → create API key → set as `YOUTUBE_API_KEY` env var in the backend repo's GitHub Actions secrets.
-- **Founder approval on the channel list** above + Bloomberg News add-on decision.
-
-**Still TBD (refine when implementation begins):**
-- **Mongolia-relevance filter semantics.** Spec reads "Mongolia + global financial" — interpret `+` as OR (include both kinds, weight Mongolia higher when present) vs AND (only items mentioning both — would yield ~0 results from these international channels). Recommend OR.
-- **Deny-list storage location** (JSON config alongside `youtube_fetcher.py` is simplest; matches existing patterns).
-- **`/video` route filter set** (date / channel / topic — recommend channel-filter-only for v1, smallest UI surface).
-- **Analytics tool choice** (GA4 vs simple counter — depends on whether GA4 is wired in by then).
-
-**DO NOT touch the "Шууд үзэх" section before the prerequisites above are met and the implementation session begins.** The current hardcoded card is the documented placeholder for this phase.
+**Deferred to Phase 7.3.x:**
+- **Bloomberg News optional add-on** (`UChirEOpgFCupRAk5etXqPaA`) — adds ~15 more entries/day with ~30% non-financial overlap. Founder decision pending.
+- **Channel distribution rebalance** — current Bloomberg + CNBC = 75% of feed (WSJ / FT / Reuters publish mostly Shorts that fail the >3 min filter). Three options when this becomes a concern: per-channel cap, lower duration threshold, accept current distribution.
+- **Next/Image optimization** for thumbnails — currently plain `<img>` with `@next/next/no-img-element` eslint-disable. Adding `images.remotePatterns` config in `next.config.ts` for `i*.ytimg.com` would enable Next's responsive + lazy + format conversion.
+- **Header navigation entry** for `/video` — currently no nav link; users discover via the homepage VideoFeed footer link or direct URL.
+- **Pagination** on `/video` — at 50-video backend cap the grid is 17 rows on lg, manageable without pagination.
+- **Date / topic filters** on `/video` — explicitly deferred per locked decision #4 (channel-only for v1).
+- **Click-through analytics** — GA4 vs simple counter, deferred to Phase 9.
 
 ---
 
