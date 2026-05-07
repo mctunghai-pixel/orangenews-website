@@ -223,7 +223,7 @@ Building on `BUSINESS_PROJECT_TEMPLATE.md` §2.6 (8-row milestone table), with o
 | 2026 (May 6-14, Days 9-14) | Sprint to commercialization — 11 sales deliverables shipped in `docs/sales/` | Day 14 = commercialization-ready state |
 | 2026 (May 7, Day 15) | **Documentation suite shipped** — `TECHNICAL_HANDBOOK.md` + `MARKET_RESEARCH.md` + `BUSINESS_PROJECT_TEMPLATE.md` + `BUSINESS_PLAN.md` (this document) | 4 documents covering engineering reference, market analysis, business project, and comprehensive business plan |
 
-**Sprint-cadence framing:** the Day 5-15 sprint produced ~36 production commits and 4 strategic documents in 11 calendar days — a velocity that itself constitutes **execution-discipline evidence** for investors and lenders.
+**Sprint-cadence framing:** the Day 5-15 sprint produced ~36 production commits and 4 strategic documents across 3 calendar days (2026-05-05 → 2026-05-07; multiple Day-N sessions per calendar day under sprint cadence) — a velocity that itself constitutes **execution-discipline evidence** for investors and lenders.
 
 ### 2.8 Current operating posture
 
@@ -1041,7 +1041,7 @@ This section provides organizational depth — current state acknowledged transp
 
 ### 9.1 Current organizational state
 
-**Founder-solo operation as of Day 17 (2026-05-09).** Acknowledged transparently; not hidden. Munkhsaikhan Mongolbayar operates Azurise Solution LLC end-to-end across all functional areas. The single-founder posture is **deliberate Year-1 design** — it minimizes fixed costs, accelerates decision velocity, and forces direct customer learning into founder hands.
+**Founder-solo operation as of Day 15 (2026-05-07).** Acknowledged transparently; not hidden. Munkhsaikhan Mongolbayar operates Azurise Solution LLC end-to-end across all functional areas. The single-founder posture is **deliberate Year-1 design** — it minimizes fixed costs, accelerates decision velocity, and forces direct customer learning into founder hands.
 
 **Functional capacity matrix:**
 
@@ -1422,7 +1422,7 @@ Orange News presents two funding paths — a recommended pre-seed path and an al
 
 **Path 1 (Recommended): Pre-seed funding $50,000-150,000 USD.**
 
-Anchored against frontier-market ecosystem reality: 80% of 2025 Central Asia venture deals were under $200K (per pre-recon Day 17 + Day 18 findings); pre-seed checks at $50-150K position cleanly within the discovery-stage band serving Central Asia frontier markets. The funding supports an 18-month runway across customer acquisition, sales/BD hire activation, product polish (Phase 7.2.2 customer-CMS layer if customer demand validates), operations, and a modest reserve.
+Anchored against frontier-market ecosystem reality: 80% of 2025 Central Asia venture deals were under $200K (per Day 15 pre-recon findings); pre-seed checks at $50-150K position cleanly within the discovery-stage band serving Central Asia frontier markets. The funding supports an 18-month runway across customer acquisition, sales/BD hire activation, product polish (Phase 7.2.2 customer-CMS layer if customer demand validates), operations, and a modest reserve.
 
 **Stack-able with the MLSP STARTUP National Championship grant** (Mongolian Ministry of Labor and Social Protection, MNT 99M ~$30K USD non-dilutive to top 6 teams). Combined Path 1 funding stack: **$80,000-180,000 USD** if government program eligibility holds in 2026. Beyond the dollar value, government endorsement provides legitimacy signaling to subsequent institutional investors.
 
@@ -1830,7 +1830,7 @@ Every production-state claim made in §1-§13 is verifiable against live infrast
 | `github.com/mctunghai-pixel/orangenews-website` | Frontend + commercialization deliverables + handbook documents | Next.js 16 + React 19 + Tailwind v4 |
 | `github.com/mctunghai-pixel/orange-news-automation` | Backend cron pipelines + Python scripts + reference docs | Python 3.11 + GitHub Actions |
 
-**Repository statistics (Day 17 / 2026-05-09):**
+**Repository statistics (Day 15 / 2026-05-07):**
 - Frontend: 7 page-class routes; 4 operational routes; 5 lib helpers; 4 fetcher modules; 11 sales deliverables in `docs/sales/`; 4 handbook documents in `docs/handbook/`.
 - Backend: 5 production cron workflows; 11 Python scripts (~5,028 LOC); 5 reference docs in `docs/`.
 
@@ -1985,7 +1985,7 @@ All citations cross-validated against multiple sources where possible; primary-s
 
 | Version | Date | Notes |
 |---|---|---|
-| v1.0 | 2026-05-09 (Day 17 ship) | Initial 14-section + glossary draft completed; founder review pending |
+| v1.0 | 2026-05-07 (Day 15 ship) | Initial 14-section + glossary draft completed; founder review pending |
 | (forthcoming) | TBD | Founder review revisions; investor-ready v1.1 |
 | (forthcoming) | TBD | Post pre-seed close updates (cap-table, governance, audited financials); v2.0 |
 
@@ -1996,11 +1996,11 @@ All citations cross-validated against multiple sources where possible; primary-s
 | `TECHNICAL_HANDBOOK.md` | 2026-05-07 (Day 15) | v1.0 | Founder review pending; engineering reference |
 | `MARKET_RESEARCH.md` | 2026-05-07 (Day 15) | v1.0 | Founder review pending |
 | `BUSINESS_PROJECT_TEMPLATE.md` | 2026-05-07 (Day 15) | v1.0 | Founder review pending |
-| `BUSINESS_PLAN.md` | 2026-05-09 (Day 17) | v1.0 | Founder review pending |
+| `BUSINESS_PLAN.md` | 2026-05-07 (Day 15) | v1.0 | Founder review pending |
 
 **D.3 Sprint history reference:**
 
-The Day 5-17 sprint produced ~36 production commits (Day 5-14) + 4 handbook documents (Day 15 + 17). Full sprint cadence documented in `~/orangenews-website/CLAUDE.md` (frontend repo) and `docs/sales/sprint_retrospective.md`. The execution velocity itself constitutes execution-discipline evidence for institutional investor and lender due diligence.
+The Day 5-15 sprint produced ~36 production commits (Day 5-14) + 4 handbook documents (Day 15). Full sprint cadence documented in `~/orangenews-website/CLAUDE.md` (frontend repo) and `docs/sales/sprint_retrospective.md`. The execution velocity itself constitutes execution-discipline evidence for institutional investor and lender due diligence.
 
 **D.4 Update protocol post-funding:**
 
@@ -2107,4 +2107,4 @@ Terms used throughout this Business Plan and companion documents, organized by c
 
 *Companion documents: `BUSINESS_PROJECT_TEMPLATE.md` (~27pp), `MARKET_RESEARCH.md` (~20pp), `TECHNICAL_HANDBOOK.md` (~38pp), `docs/sales/` (~70pp aggregate).*
 
-*Aggregate document suite Day 17: ~199 pages of investor + engineering + commercial reference material.*
+*Aggregate document suite Day 15: ~199 pages of investor + engineering + commercial reference material.*

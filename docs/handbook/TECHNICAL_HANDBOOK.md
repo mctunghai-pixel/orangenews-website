@@ -104,7 +104,7 @@ There is no shared database, no shared deployment pipeline, no API surface betwe
 ```mermaid
 flowchart LR
     subgraph EXT["External sources"]
-        RSS["13 RSS feeds<br/>(international + ikon.mn)"]
+        RSS["14 RSS feeds<br/>(international + ikon.mn)"]
         MONTSAME["montsame.mn<br/>HTML scraper"]
         MSE["mse.mn<br/>Server Actions endpoint"]
         FX["ExchangeRate-API<br/>(MNT/USD)"]
@@ -113,7 +113,7 @@ flowchart LR
         YT["YouTube RSS<br/>(6 channels)"]
         YTAPI["YouTube Data API<br/>(duration enrichment)"]
         FB["Facebook Graph API<br/>(write-only)"]
-        ANTH["Anthropic API<br/>(Claude 4.x)"]
+        ANTH["Anthropic API<br/>(Claude Haiku 4.5)"]
     end
 
     subgraph BE["Backend repo: orange-news-automation"]
@@ -244,9 +244,9 @@ flowchart LR
 To make the architecture concrete, follow a single Bloomberg article from publication on the wire to a clickable card on the homepage:
 
 1. **22:00 UTC** — `orange_news.yml` cron fires. Ubuntu runner spins up. Mongolia timezone set, fonts installed (`fonts-noto`, `fonts-noto-cjk`), Python deps installed.
-2. **Phase 1 — RSS collection.** `orange_rss_collector.py` walks the 13 RSS feed list (Bloomberg, Reuters, FT, etc. + ikon.mn + Montsame scraper) and produces a candidate-pool JSON of ~50–80 stories ranked by topic + recency.
+2. **Phase 1 — RSS collection.** `orange_rss_collector.py` walks the 14 RSS feed list (Bloomberg, Reuters, FT, etc. + ikon.mn + Montsame scraper) and produces a candidate-pool JSON of ~50–80 stories ranked by topic + recency.
 3. **Phase 1.5 — Market data sidecar.** `market_data_fetcher.py` runs in parallel (`continue-on-error: true`) so the translator has fresh quotes for any market-related article without blocking on a transient yfinance hiccup.
-4. **Phase 2 — Translation.** `orange_translator.py` shortlists ~10 stories. For each: send the English/Russian source to Claude 4.x with `temperature=0.0–0.2`, prompt-engineered for Mongolian Cyrillic editorial standards (60–80 char headline range, clean lede, no marketing flourish). Mongolian-source articles route through `passthrough_mongolian` (no LLM, just byline preservation).
+4. **Phase 2 — Translation.** `orange_translator.py` shortlists ~10 stories. For each: send the English/Russian source through Gemini 2.0 Flash (primary) with Claude Haiku 4.5 fallback at `temperature=0.0–0.2`, prompt-engineered for Mongolian Cyrillic editorial standards (60–80 char headline range, clean lede, no marketing flourish). Mongolian-source articles route through `passthrough_mongolian` (no LLM, just byline preservation).
 5. **Phase 3 — Image generation.** `image_generator.py` picks an OG-style 1200×630 banner per article from a curated visual library, overlaying headline text with subset-bundled Noto Sans Cyrillic.
 6. **Phase 3.5 — Archive snapshot.** `archive_writer.py` snapshots the produced `translated_posts.json` to `archive/posts_2026-05-07.json` (idempotent — re-runs on the same day overwrite safely) and upserts `archive/index.json`.
 7. **Phase 4 — Facebook publication.** `fb_poster.py` (or `fb_poster_live.py` for the Market Watch lead post) schedules the staggered 09:00–17:00 MNT publication queue.
@@ -337,7 +337,7 @@ All five workflows share the same five idioms: `actions/checkout@v4` → `action
 
 ### 3.1 `orange_news.yml` — Daily News Pipeline
 
-**Purpose:** the heaviest workflow. Walks 13 RSS feeds + Montsame scraper, runs the translator across the top ~10 stories, generates branded images, schedules the Facebook publish queue, snapshots the archive, and commits the day's `translated_posts.json` back to the repo.
+**Purpose:** the heaviest workflow. Walks 14 RSS feeds + Montsame scraper, runs the translator across the top ~10 stories, generates branded images, schedules the Facebook publish queue, snapshots the archive, and commits the day's `translated_posts.json` back to the repo.
 
 **Cron:** `0 22 * * *` UTC = 06:00 MNT (next calendar day, since Mongolia is UTC+8). The 22:00 UTC slot is intentionally chosen as off-peak — GHA scheduler queue delays in the 07:00–09:00 UTC window are well-documented; the 22:00 slot typically sees < 1 min queue lag.
 
