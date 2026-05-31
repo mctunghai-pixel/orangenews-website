@@ -9,6 +9,7 @@ import "./globals.css";
 import { TickerBarLoader } from "@/components/layout/TickerBarLoader";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { TelegramCTA } from "@/components/layout/TelegramCTA";
 
 const ptSerif = PT_Serif({
   weight: ["400", "700"],
@@ -74,6 +75,7 @@ export default function RootLayout({
         <TickerBarLoader />
         <Header />
         <div className="flex-1">{children}</div>
+        <TelegramCTA />
         <Footer />
       </body>
     </html>
