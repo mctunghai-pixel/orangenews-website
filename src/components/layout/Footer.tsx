@@ -4,6 +4,7 @@ const socialLinks = [
   { label: "Facebook", code: "FB", href: "https://www.facebook.com/orangenews.mn" },
   { label: "Instagram", code: "IG", href: "https://www.instagram.com/orangenews.official" },
   { label: "Threads", code: "TH", href: "https://www.threads.net/@orangenews.official" },
+  { label: "Telegram", code: "TG", href: "https://t.me/OrangeNewsMN" },
 ];
 
 interface FooterLink {
