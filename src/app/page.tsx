@@ -52,6 +52,23 @@ export default async function Home() {
   const heroArticle = newsArticles[1] ?? newsArticles[0] ?? null;
   const secondaryList = newsArticles.slice(2, 6);
 
+  // Homepage "Сүүлийн мэдээ" feed: target an even 10 cards so the 2-column grid
+  // always fills cleanly (an odd count leaves a trailing empty slot). When today
+  // has fewer than 10 news, top up from the most recent archived days — scoped to
+  // this feed only; Hero/Breaking/Secondary keep the today-only feed contract.
+  const FEED_TARGET = 10;
+  let feedArticles = newsArticles.slice(0, FEED_TARGET);
+  if (feedArticles.length < FEED_TARGET) {
+    const recent = await fetchOrangeNews({ archiveDays: 3 });
+    if (recent.source === "live") {
+      const seen = new Set(feedArticles.map((a) => a.slug));
+      feedArticles = [
+        ...feedArticles,
+        ...recent.articles.filter((a) => !seen.has(a.slug)),
+      ].slice(0, FEED_TARGET);
+    }
+  }
+
   return (
     <>
       <BreakingStrip article={breakingArticle} />
@@ -82,7 +99,7 @@ export default async function Home() {
           style={{ animationDelay: "0.25s", animationFillMode: "both" }}
         >
           <div className="lg:col-span-8">
-            <ArticleFeed articles={articles} />
+            <ArticleFeed articles={feedArticles} />
           </div>
           <aside className="lg:col-span-4">
             <MostRead />
