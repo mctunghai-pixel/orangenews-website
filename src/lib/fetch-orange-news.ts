@@ -153,6 +153,16 @@ function safeImageUrl(url?: string): string | undefined {
   return url && url.startsWith(IMAGE_URL_PREFIX) ? url : undefined;
 }
 
+/** Excerpt without the "🔷 TECH" badge line / repeated headline at the top of post_text. */
+function makeExcerpt(post: OrangeNewsPost): string {
+  const src = post.body_only || post.post_text || "";
+  const lines = src
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && l !== post.headline && !/^[^\p{L}\p{N}]*[A-Z_ ]{2,}$/u.test(l));
+  return lines.join(" ").substring(0, 200);
+}
+
 /** Map raw OrangeNewsPost (from JSON) → normalized Article.
  *  publishedAt: when archive lookup is in play, callers pass the per-day
  *  snapshot date. Today-only path falls back to fetch time. */
@@ -166,7 +176,7 @@ function mapPost(post: OrangeNewsPost, idx: number, publishedAt: Date = new Date
     slug: slugify(post.original_title || post.headline || `post-${idx}`),
     category,
     headline: post.headline || post.original_title || "Untitled",
-    excerpt: post.post_text?.substring(0, 200) || "",
+    excerpt: makeExcerpt(post),
     body,
     source: post.source || "Orange News",
     sourceUrl,
