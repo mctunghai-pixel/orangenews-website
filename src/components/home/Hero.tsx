@@ -13,12 +13,21 @@ export function Hero({ article, marketInstrument }: HeroProps) {
   return (
     <article className="flex flex-col">
       <div className="relative aspect-[16/10] md:aspect-[16/9] overflow-hidden bg-foreground">
-        <LineChart
-          points={marketInstrument.history1m}
-          tone="accent"
-          ariaLabel={`${marketInstrument.symbol} 30 хоногийн хөдөлгөөн`}
-          gradientId="hero-chart-grad"
-        />
+        {article.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={article.imageUrl}
+            alt={article.headline}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <LineChart
+            points={marketInstrument.history1m}
+            tone="accent"
+            ariaLabel={`${marketInstrument.symbol} 30 хоногийн хөдөлгөөн`}
+            gradientId="hero-chart-grad"
+          />
+        )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-foreground via-foreground/70 to-transparent p-4 md:p-6">
           <div className="flex items-center gap-2">
             <span className="font-sans text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-accent">

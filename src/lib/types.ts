@@ -42,6 +42,8 @@ export interface OrangeNewsPost {
   is_market_watch: boolean;
   use_market_watch_image?: boolean;
   image_path?: string;
+  /** Public 16:9 website card (media-public branch), set by the pipeline after push */
+  image_web_url?: string;
 }
 
 // -----------------------------------------------------------------------------
@@ -83,6 +85,8 @@ export interface Article {
   readTime: number;
   score: number;
   pattern: ArticlePattern;
+  /** Licensed news photo card (Visual Standard v1); undefined → PatternSvg fallback */
+  imageUrl?: string;
   hashtags: string[];
   isMarketWatch: boolean;
 }

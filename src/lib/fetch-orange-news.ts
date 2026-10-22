@@ -145,6 +145,14 @@ function estimateReadTime(text: string): number {
 // 6. Mappers
 // -----------------------------------------------------------------------------
 
+const IMAGE_URL_PREFIX =
+  "https://raw.githubusercontent.com/mctunghai-pixel/orange-news-automation/media-public/";
+
+/** Only accept pipeline-produced card URLs (media-public branch). */
+function safeImageUrl(url?: string): string | undefined {
+  return url && url.startsWith(IMAGE_URL_PREFIX) ? url : undefined;
+}
+
 /** Map raw OrangeNewsPost (from JSON) → normalized Article.
  *  publishedAt: when archive lookup is in play, callers pass the per-day
  *  snapshot date. Today-only path falls back to fetch time. */
@@ -167,6 +175,7 @@ function mapPost(post: OrangeNewsPost, idx: number, publishedAt: Date = new Date
     readTime: estimateReadTime(body),
     score: post.score ?? 0,
     pattern: pickPattern(category),
+    imageUrl: safeImageUrl(post.image_web_url),
     hashtags: post.hashtags || [],
     isMarketWatch: post.is_market_watch === true || post.type === "market_watch",
   };

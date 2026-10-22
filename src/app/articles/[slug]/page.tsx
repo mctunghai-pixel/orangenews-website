@@ -43,6 +43,13 @@ export default async function ArticlePage({ params }: PageProps) {
         {article.headline}
       </h1>
 
+      {article.imageUrl && (
+        <figure className="mt-6 aspect-[16/9] overflow-hidden bg-foreground">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={article.imageUrl} alt={article.headline} className="h-full w-full object-cover" />
+        </figure>
+      )}
+
       <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-[12px] md:text-[13px] text-muted">
         <span className="font-semibold text-foreground">{article.source}</span>
         <span aria-hidden>·</span>

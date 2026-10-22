@@ -149,7 +149,17 @@ export function ArticleFeed({ articles, heading }: ArticleFeedProps) {
         {articles.map((article) => (
           <article key={article.id} className="flex flex-col">
             <div className="mb-3 aspect-[16/9] overflow-hidden bg-foreground">
-              <PatternSvg pattern={article.pattern} />
+              {article.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={article.imageUrl}
+                  alt={article.headline}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <PatternSvg pattern={article.pattern} />
+              )}
             </div>
             <span className="font-sans text-[10px] md:text-[11px] font-semibold uppercase tracking-wider text-accent">
               {article.category}
