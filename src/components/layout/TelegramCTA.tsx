@@ -1,5 +1,5 @@
 /**
- * Orange News — Telegram subscribe CTA band (rendered above <Footer/> in layout).
+ * Aravt News — Telegram subscribe CTA band (rendered above <Footer/> in layout).
  * Styled with the site design tokens + serif system so it matches Footer.tsx
  * (no zinc/orange Tailwind defaults, no dark: variants).
  * Plain <img> for the QR — repo convention avoids next/image (see MarketWatchImage.tsx).
@@ -56,7 +56,7 @@ export function TelegramCTA() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/telegram_qr.png"
-              alt="Orange News Telegram суваг QR код — t.me/OrangeNewsMN"
+              alt="Aravt News Telegram суваг QR код — t.me/OrangeNewsMN"
               width={150}
               height={150}
               className="h-[150px] w-[150px]"

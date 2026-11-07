@@ -26,11 +26,11 @@ export function SubscribeConfirmEmail({ verifyUrl }: Props) {
   return (
     <Html lang="mn">
       <Head />
-      <Preview>Orange News товхимолд бүртгэлээ баталгаажуулна уу</Preview>
+      <Preview>Aravt News товхимолд бүртгэлээ баталгаажуулна уу</Preview>
       <Body style={bodyStyle}>
         <Container style={containerStyle}>
           <Heading as="h1" style={headingStyle}>
-            Orange News Товхимол
+            Aravt News Товхимол
           </Heading>
           <Text style={textStyle}>
             Та манай өдөр тутмын товхимолд бүртгүүлэх хүсэлт илгээлээ. Доорх

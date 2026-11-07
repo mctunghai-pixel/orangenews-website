@@ -1,8 +1,8 @@
 // =============================================================================
-// Orange News — TypeScript Type Definitions
+// Aravt News — TypeScript Type Definitions
 // =============================================================================
 // Author: Azurise AI Master Architect
-// Purpose: Type-safe shape for Orange News content from automation repo
+// Purpose: Type-safe shape for Aravt News content from automation repo
 // =============================================================================
 
 // -----------------------------------------------------------------------------

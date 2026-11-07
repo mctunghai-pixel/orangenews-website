@@ -1,7 +1,7 @@
 // =============================================================================
 // RSS 2.0 feed route — /rss.xml
 // =============================================================================
-// Server-side route handler that emits RSS 2.0 XML for Orange News articles.
+// Server-side route handler that emits RSS 2.0 XML for Aravt News articles.
 // Pulls the most recent 7 days from the Phase 7.1 archive, then top 20 by
 // score, wraps Cyrillic content in CDATA, formats pubDate per RFC 822.
 // Cached for 1 hour to balance freshness/cost.
@@ -18,9 +18,9 @@ const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ??
   (process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
-    : "https://orangenews-website.vercel.app");
+    : "https://www.aravtnews.com");
 
-const FEED_TITLE = "Orange News";
+const FEED_TITLE = "Aravt News";
 const FEED_DESCRIPTION =
   "Bloomberg-style Mongolian financial news — санхүү, технологи, эдийн засаг";
 const FEED_LANGUAGE = "mn";

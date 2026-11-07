@@ -45,16 +45,16 @@ const SITE_URL =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Orange News — Монгол Улсын санхүүгийн сэтгүүлч",
+  title: "Aravt News — Монгол Улсын санхүүгийн сэтгүүлч",
   description:
     "Bloomberg-ийг санагдуулам монгол санхүү, технологи, эдийн засгийн редакцлагдсан урсгал. Автомат pipeline-ээр шинэчлэгдэнэ.",
   openGraph: {
-    title: "Orange News — Монгол Улсын санхүүгийн сэтгүүлч",
+    title: "Aravt News — Монгол Улсын санхүүгийн сэтгүүлч",
     description:
       "Санхүү, технологи, эдийн засгийн өдөр тутмын редакцлагдсан урсгал.",
     locale: "mn_MN",
     type: "website",
-    siteName: "Orange News",
+    siteName: "Aravt News",
   },
   twitter: {
     card: "summary_large_image",

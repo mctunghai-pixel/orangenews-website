@@ -2,12 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "RSS Feed — Orange News",
+  title: "RSS Feed — Aravt News",
   description:
-    "Orange News RSS feed: бүх ангилалын шинэ нийтлэлүүдийг RSS reader, news aggregator-аар шууд хүлээн авах боломж.",
+    "Aravt News RSS feed: бүх ангилалын шинэ нийтлэлүүдийг RSS reader, news aggregator-аар шууд хүлээн авах боломж.",
 };
 
-const RSS_URL = "https://orangenews-website.vercel.app/rss.xml";
+const RSS_URL = "https://www.aravtnews.com/rss.xml";
 
 export default function RssInfoPage() {
   return (
@@ -20,7 +20,7 @@ export default function RssInfoPage() {
       </Link>
 
       <h1 className="font-serif-display text-[28px] md:text-[40px] font-bold leading-tight">
-        Orange News RSS Feed
+        Aravt News RSS Feed
       </h1>
       <p className="mt-3 font-serif-body text-[16px] md:text-[17px] leading-[1.8] text-muted">
         Манай мэдээллийн урсгалыг шууд татаж аваарай.

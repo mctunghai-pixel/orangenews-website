@@ -1,5 +1,5 @@
 // =============================================================================
-// Orange News — YouTube Video Feed Fetcher (Phase 7.3 Checkpoint B)
+// Aravt News — YouTube Video Feed Fetcher (Phase 7.3 Checkpoint B)
 // =============================================================================
 // Author: Azurise AI Master Architect
 // Purpose: Fetch youtube_data.json from automation repo, normalize the raw

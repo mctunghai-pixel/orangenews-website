@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Хамтран ажиллах — Orange News",
+  title: "Хамтран ажиллах — Aravt News",
   description:
     "Санхүүгийн байгууллагууд, финтек компаниуд, судалгааны хүрээлэнгүүдтэй харилцан үнэ цэнэ бүтээх нээлттэй хамтын ажиллагаа.",
 };
@@ -22,7 +22,7 @@ export default function PartnershipPage() {
       </h1>
 
       <p className="mt-8 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
-        Orange News нь санхүүгийн байгууллагууд, финтек компаниуд, судалгааны
+        Aravt News нь санхүүгийн байгууллагууд, финтек компаниуд, судалгааны
         хүрээлэнгүүд болон бие даасан шинжээчидтэй харилцан үнэ цэнэ бүтээх
         зорилгоор дараах чиглэлүүдээр нээлттэй хамтран ажиллана:
       </p>
@@ -61,10 +61,10 @@ export default function PartnershipPage() {
       <p className="mt-4 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
         Имэйл:{" "}
         <a
-          href="mailto:info@orangenews.mn"
+          href="mailto:info@aravtnews.com"
           className="text-accent hover:underline"
         >
-          info@orangenews.mn
+          info@aravtnews.com
         </a>
         <br />
         Хариу өгөх хугацаа: 1-3 ажлын өдөр

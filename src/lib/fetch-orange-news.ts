@@ -1,5 +1,5 @@
 // =============================================================================
-// Orange News — Live Data Fetcher
+// Aravt News — Live Data Fetcher
 // =============================================================================
 // Author: Azurise AI Master Architect
 // Purpose: Fetch translated_posts.json from automation repo, normalize to
@@ -169,7 +169,7 @@ function makeExcerpt(post: OrangeNewsPost): string {
 function mapPost(post: OrangeNewsPost, idx: number, publishedAt: Date = new Date()): Article {
   const category = mapCategory(post.category);
   const body = post.body_only || post.full_post || post.post_text || "";
-  const sourceUrl = post.url || post.original_url || "https://www.orangenews.mn";
+  const sourceUrl = post.url || post.original_url || "https://www.aravtnews.com";
 
   return {
     id: generateId(sourceUrl, idx),
@@ -178,7 +178,7 @@ function mapPost(post: OrangeNewsPost, idx: number, publishedAt: Date = new Date
     headline: post.headline || post.original_title || "Untitled",
     excerpt: makeExcerpt(post),
     body,
-    source: post.source || "Orange News",
+    source: post.source || "Aravt News",
     sourceUrl,
     publishedAt,
     timeAgo: timeAgoMongolian(publishedAt),
@@ -202,7 +202,7 @@ function feedArticleToArticle(fa: FeedArticle, idx: number): Article {
     excerpt: fa.excerpt,
     body: fa.excerpt, // mock has no body, use excerpt
     source: fa.source,
-    sourceUrl: "https://www.orangenews.mn",
+    sourceUrl: "https://www.aravtnews.com",
     publishedAt: new Date(),
     timeAgo: fa.timeAgo,
     readTime: 3,

@@ -19,7 +19,7 @@ import { fetchYouTube } from "@/lib/fetch-youtube";
 import type { YouTubeVideo } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Видео архив — Orange News",
+  title: "Видео архив — Aravt News",
   description:
     "Bloomberg Television, WSJ, Reuters, Financial Times, CNBC, World Bank — санхүүгийн шууд видео архив.",
 };

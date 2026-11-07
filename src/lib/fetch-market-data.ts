@@ -1,5 +1,5 @@
 // =============================================================================
-// Orange News — Live Market Data Fetcher
+// Aravt News — Live Market Data Fetcher
 // =============================================================================
 // Fetch market_data.json from automation repo (when available), normalize to
 // MarketInstrument records. Falls back to mock data on any error.

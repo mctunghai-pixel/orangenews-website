@@ -1,5 +1,5 @@
 // =============================================================================
-// Orange News — Live MSE Data Fetcher
+// Aravt News — Live MSE Data Fetcher
 // =============================================================================
 // Fetches mse_data.json from the orange-news-automation backend (cron-refreshed
 // twice daily on weekdays). Mirrors the fetch-market-data.ts envelope: ISR

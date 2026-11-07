@@ -1,5 +1,5 @@
 // =============================================================================
-// Orange News — MSE Mock Fallback Data
+// Aravt News — MSE Mock Fallback Data
 // =============================================================================
 // Used by fetch-mse-data.ts when the live mse_data.json is unreachable or
 // malformed. Values sampled from the 2026-05-03 manual-dispatch snapshot —

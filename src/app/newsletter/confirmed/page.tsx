@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Бүртгэл — Orange News",
+  title: "Бүртгэл — Aravt News",
 };
 
 interface PageProps {
@@ -20,7 +20,7 @@ const COPY = {
   },
   error: {
     heading: "Алдаа гарлаа",
-    body: "Бид одоогоор бүртгэлийг боловсруулж чадсангүй. Хэдэн минутын дараа дахин оролдож үзнэ үү. Асуудал үргэлжилбэл info@orangenews.mn хаягаар бидэнд мэдэгдэнэ үү.",
+    body: "Бид одоогоор бүртгэлийг боловсруулж чадсангүй. Хэдэн минутын дараа дахин оролдож үзнэ үү. Асуудал үргэлжилбэл info@aravtnews.com хаягаар бидэнд мэдэгдэнэ үү.",
   },
 } as const;
 

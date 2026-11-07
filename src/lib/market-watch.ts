@@ -1,7 +1,7 @@
 // =============================================================================
 // Market Watch — daily financial briefing data layer
 // =============================================================================
-// Fetches Orange News' daily Market Watch post from translated_posts.json
+// Fetches Aravt News' daily Market Watch post from translated_posts.json
 // (typically index 0). Detection signals match fb_poster_live.py:find_market_watch
 // (3-OR: is_market_watch flag, type, category). Returns null if not found or
 // fetch fails — caller renders empty state.

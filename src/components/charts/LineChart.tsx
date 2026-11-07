@@ -9,7 +9,7 @@
 // TODO(Phase 5): migrate hardcoded hex to globals.css design tokens
 //   (e.g. --color-success, --color-danger) once theme system is finalized.
 const CHART_TONES = {
-  accent: "#FF6B1A",
+  accent: "#9A7614",
   up: "#16A34A",
   down: "#DC2626",
 } as const;

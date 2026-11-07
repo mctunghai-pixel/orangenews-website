@@ -1,5 +1,5 @@
 // =============================================================================
-// Orange News — Open Graph Image Generator (shared helper)
+// Aravt News — Open Graph Image Generator (shared helper)
 // =============================================================================
 // Edge-runtime helper for OG share images. Three exports — homepage, article,
 // category — each returning an ImageResponse. Fonts are bundled via the
@@ -14,11 +14,11 @@ export const OG_CONTENT_TYPE = "image/png";
 
 // Mirrors src/app/globals.css @theme color tokens
 const COLORS = {
-  bg: "#FFFFFF",
-  text: "#0A0A0A",
-  muted: "#525252",
-  border: "#E5E5E5",
-  accent: "#FF6B1A",
+  bg: "#08142B",
+  text: "#FFFFFF",
+  muted: "#A0ACC4",
+  border: "#1E2E4F",
+  accent: "#D4AF37",
 } as const;
 
 const MAX_HEADLINE_CHARS = 100;
@@ -75,7 +75,7 @@ function OgFrame({ children }: { children: ReactNode }) {
               color: COLORS.accent,
             }}
           >
-            ORANGE
+            ARAVT
           </span>
           <span
             style={{
@@ -115,7 +115,7 @@ function OgFrame({ children }: { children: ReactNode }) {
           borderTop: `1px solid ${COLORS.border}`,
         }}
       >
-        <span>orangenews.mn</span>
+        <span>aravtnews.com</span>
         <div
           style={{
             display: "flex",

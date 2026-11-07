@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Импрессум — Orange News",
+  title: "Импрессум — Aravt News",
   description:
-    "Orange News хуулийн этгээдийн мэдээлэл, хариуцлагатай удирдлага, хостинг үйлчилгээний дэлгэрэнгүй.",
+    "Aravt News хуулийн этгээдийн мэдээлэл, хариуцлагатай удирдлага, хостинг үйлчилгээний дэлгэрэнгүй.",
 };
 
 export default function ImpressumPage() {
@@ -25,7 +25,7 @@ export default function ImpressumPage() {
         Хуулийн этгээдийн мэдээлэл
       </h3>
       <p className="mt-4 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
-        Orange News-ийн албан ёсны хуулийн этгээдийн бүртгэлийн процесс явагдаж
+        Aravt News-ийн албан ёсны хуулийн этгээдийн бүртгэлийн процесс явагдаж
         байна. Хуулийн этгээдийн дэлгэрэнгүй мэдээлэл (бүртгэлийн дугаар,
         хаяг, хариуцлагатай удирдлага) бүртгэлийн ажил дууссаны дараа энд
         байршуулагдана.
@@ -44,10 +44,10 @@ export default function ImpressumPage() {
       <p className="mt-4 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
         Имэйл:{" "}
         <a
-          href="mailto:info@orangenews.mn"
+          href="mailto:info@aravtnews.com"
           className="text-accent hover:underline"
         >
-          info@orangenews.mn
+          info@aravtnews.com
         </a>
       </p>
 
@@ -66,10 +66,10 @@ export default function ImpressumPage() {
       <p className="mt-4 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
         Хуулийн харилцаатай холбоотой шуурхай асуудлыг{" "}
         <a
-          href="mailto:info@orangenews.mn"
+          href="mailto:info@aravtnews.com"
           className="text-accent hover:underline"
         >
-          info@orangenews.mn
+          info@aravtnews.com
         </a>{" "}
         хаягаар илгээнэ үү. Subject line-нд &quot;Хуулийн асуудал&quot; гэж тэмдэглэсэн
         байх.

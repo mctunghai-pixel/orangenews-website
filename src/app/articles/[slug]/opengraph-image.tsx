@@ -2,7 +2,7 @@ import { renderArticleOg, OG_SIZE, OG_CONTENT_TYPE } from "@/lib/og-image";
 import { getPostBySlug } from "@/lib/fetch-orange-news";
 
 export const runtime = "edge";
-export const alt = "Orange News article";
+export const alt = "Aravt News article";
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
@@ -16,7 +16,7 @@ export default async function Image({
 
   if (!article) {
     return renderArticleOg({
-      category: "ORANGE NEWS",
+      category: "ARAVT NEWS",
       headline: "Нийтлэл олдсонгүй",
     });
   }

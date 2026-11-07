@@ -4,7 +4,7 @@ import { getMarketWatch } from "@/lib/market-watch";
 import { MarketWatchImage } from "@/components/markets/MarketWatchImage";
 
 export const metadata: Metadata = {
-  title: "Market Watch — Orange News",
+  title: "Market Watch — Aravt News",
   description:
     "Орчин үеийн зах зээлийн өдрийн тойм. Валют, индекс, крипто, түүхий эдийн өнөөдрийн хөдөлгөөн өглөө бүр 8:00 цагт.",
 };

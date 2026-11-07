@@ -2,18 +2,14 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Холбоо барих — Orange News",
+  title: "Холбоо барих — Aravt News",
   description:
-    "Orange News-тэй имэйл болон сошиал медиагаар холбогдох боломжтой. Хариу өгөх хугацаа 1-3 ажлын өдөр.",
+    "Aravt News-тэй имэйл болон сошиал медиагаар холбогдох боломжтой. Хариу өгөх хугацаа 1-3 ажлын өдөр.",
 };
 
 const socials: Array<{ label: string; href: string }> = [
-  { label: "Facebook", href: "https://www.facebook.com/orangenews.mn" },
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/orangenews.official",
-  },
-  { label: "Threads", href: "https://www.threads.net/@orangenews.official" },
+  { label: "Facebook", href: "https://www.facebook.com/AravtNews" },
+  { label: "Telegram", href: "https://t.me/OrangeNewsMN" },
 ];
 
 export default function ContactPage() {
@@ -38,10 +34,10 @@ export default function ContactPage() {
       </h3>
       <p className="mt-2 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
         <a
-          href="mailto:info@orangenews.mn"
+          href="mailto:info@aravtnews.com"
           className="text-accent hover:underline"
         >
-          info@orangenews.mn
+          info@aravtnews.com
         </a>
       </p>
 
@@ -77,10 +73,10 @@ export default function ContactPage() {
       <p className="mt-2 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
         Редакцтай шууд холбогдох хүсэлтээ{" "}
         <a
-          href="mailto:info@orangenews.mn"
+          href="mailto:info@aravtnews.com"
           className="text-accent hover:underline"
         >
-          info@orangenews.mn
+          info@aravtnews.com
         </a>{" "}
         хаягаар илгээнэ үү. Subject line-нд &quot;Редакц&quot; гэж тэмдэглээрэй.
       </p>
@@ -91,10 +87,10 @@ export default function ContactPage() {
       <p className="mt-2 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
         Бизнесийн санал, partnership-ийн хүсэлтийг{" "}
         <a
-          href="mailto:info@orangenews.mn"
+          href="mailto:info@aravtnews.com"
           className="text-accent hover:underline"
         >
-          info@orangenews.mn
+          info@aravtnews.com
         </a>{" "}
         хаягаар хүлээн авна. Дэлгэрэнгүй мэдээллийг{" "}
         <Link href="/partnership" className="text-accent hover:underline">

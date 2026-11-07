@@ -15,7 +15,7 @@ function PatternSvg({ pattern }: { pattern: ArticlePattern }) {
     className: "h-full w-full",
     preserveAspectRatio: "none" as const,
   };
-  const orange = "#FF6B1A";
+  const orange = "#9A7614"; // brand accent (Aravt gold)
 
   switch (pattern) {
     case "chart":

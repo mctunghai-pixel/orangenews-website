@@ -5,12 +5,12 @@
   --color-foreground: #0A0A0A;
   --color-muted: #525252;
   --color-border: #E5E5E5;
-  --color-accent: #FF6B1A;
-  --color-accent-hover: #E85A0F;
+  --color-accent: #9A7614;
+  --color-accent-hover: #08142B;
   --color-up: #16A34A;
   --color-down: #DC2626;
-  --color-breaking: #FFF4EC;
-  --color-breaking-border: #FFD4B8;
+  --color-breaking: #FBF6E6;
+  --color-breaking-border: #EAD9A0;
   --color-auto-bg: rgba(22, 163, 74, 0.08);
 
   --font-serif-display: var(--font-pt-serif);

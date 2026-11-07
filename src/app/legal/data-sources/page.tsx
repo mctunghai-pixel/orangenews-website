@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { LegalPageLayout } from "@/components/legal/LegalPageLayout";
 
 export const metadata: Metadata = {
-  title: "Мэдээллийн эх сурвалж — Orange News",
+  title: "Мэдээллийн эх сурвалж — Aravt News",
   description:
-    "Orange News-ийн зах зээлийн мэдээ, индекс, дата эх сурвалжуудын жагсаалт болон оюуны өмчийн хүндэтгэлийн зарчмууд.",
+    "Aravt News-ийн зах зээлийн мэдээ, индекс, дата эх сурвалжуудын жагсаалт болон оюуны өмчийн хүндэтгэлийн зарчмууд.",
 };
 
 export default function DataSourcesPage() {
   return (
     <LegalPageLayout
       title="Мэдээллийн эх сурвалж ба Өгөгдөл"
-      intro="Orange News нь олон улсын зах зээлийн мэдээ, индексүүдийг дэлхийн нэр хүндтэй эх сурвалжуудаас авч, эсвэл боловсруулан дамжуулдаг. Бид эх сурвалжийн оюуны өмчийг бүрэн хүндэтгэж, анхдагч эх сурвалж руу чиглэсэн холбоосыг үргэлж нээлттэй үлдээдэг."
+      intro="Aravt News нь олон улсын зах зээлийн мэдээ, индексүүдийг дэлхийн нэр хүндтэй эх сурвалжуудаас авч, эсвэл боловсруулан дамжуулдаг. Бид эх сурвалжийн оюуны өмчийг бүрэн хүндэтгэж, анхдагч эх сурвалж руу чиглэсэн холбоосыг үргэлж нээлттэй үлдээдэг."
     >
       <h2>Бидний хэрэглэдэг гол эх сурвалжууд</h2>
 
@@ -86,7 +86,7 @@ export default function DataSourcesPage() {
       <h2>Холбоо барих</h2>
       <p>
         Эх сурвалжтай холбоотой асуулт, copyright concerns:{" "}
-        <a href="mailto:info@orangenews.mn">info@orangenews.mn</a>
+        <a href="mailto:info@aravtnews.com">info@aravtnews.com</a>
       </p>
     </LegalPageLayout>
   );

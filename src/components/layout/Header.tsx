@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { Menu, Search, X, Bookmark, ChevronRight } from "lucide-react";
 
 const marketWatchLink = { label: "Market Watch", href: "/market-watch" };
@@ -67,12 +68,12 @@ export function Header() {
 
         <Link
           href="/"
-          aria-label="Orange News нүүр"
+          aria-label="Aravt News нүүр"
           className="flex items-center gap-2"
         >
-          <span className="inline-block h-2 w-2 rounded-full bg-accent" aria-hidden />
+          <BrandMark size={26} />
           <span className="font-serif-display text-[18px] md:text-[22px] font-bold tracking-tight">
-            Orange News
+            Aravt News
           </span>
         </Link>
 

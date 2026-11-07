@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { LegalPageLayout } from "@/components/legal/LegalPageLayout";
 
 export const metadata: Metadata = {
-  title: "Нууцлалын бодлого — Orange News",
+  title: "Нууцлалын бодлого — Aravt News",
   description:
-    "Orange News хэрэглэгчдийн мэдээлэл цуглуулах, ашиглах, хадгалах болон хамгаалах талаарх нууцлалын бодлого.",
+    "Aravt News хэрэглэгчдийн мэдээлэл цуглуулах, ашиглах, хадгалах болон хамгаалах талаарх нууцлалын бодлого.",
 };
 
 export default function PrivacyPage() {
@@ -12,7 +12,7 @@ export default function PrivacyPage() {
     <LegalPageLayout
       title="Нууцлалын бодлого"
       effectiveDate="2026 оны 4 сарын 30"
-      intro="Orange News платформ нь хэрэглэгчдийнхээ мэдээллийн аюулгүй байдал, хувийн нууцыг дээд зэргээр хүндэтгэн хамгаалах зорилгоор энэхүү нууцлалын бодлогыг хэрэгжүүлж байна."
+      intro="Aravt News платформ нь хэрэглэгчдийнхээ мэдээллийн аюулгүй байдал, хувийн нууцыг дээд зэргээр хүндэтгэн хамгаалах зорилгоор энэхүү нууцлалын бодлогыг хэрэгжүүлж байна."
     >
       <h2>Нэг. Бид ямар мэдээлэл цуглуулдаг вэ?</h2>
       <p>Бид танаас дараах хоёр төрлийн мэдээллийг цуглуулж болно:</p>
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
         <li>Манай имэйл жагсаалтаас цуцлах (Unsubscribe) товчийг дарж гарах</li>
         <li>
           Өөрийн мэдээллийг устгуулах хүсэлтээ{" "}
-          <a href="mailto:info@orangenews.mn">info@orangenews.mn</a> хаягаар
+          <a href="mailto:info@aravtnews.com">info@aravtnews.com</a> хаягаар
           илгээх
         </li>
         <li>Хувийн мэдээллийг засварлах, шинэчлэх</li>
@@ -85,7 +85,7 @@ export default function PrivacyPage() {
       <h2>Тав. Холбоо барих</h2>
       <p>
         Нууцлалтай холбоотой асуулт, гомдлыг{" "}
-        <a href="mailto:info@orangenews.mn">info@orangenews.mn</a> хаягаар
+        <a href="mailto:info@aravtnews.com">info@aravtnews.com</a> хаягаар
         илгээнэ үү.
       </p>
     </LegalPageLayout>

@@ -14,7 +14,8 @@ import { render } from "@react-email/components";
 import { SubscribeConfirmEmail } from "@/emails/SubscribeConfirmEmail";
 import { signToken, tokenExpiry } from "@/lib/subscribe-token";
 
-const DEFAULT_FROM = "Orange News <noreply@orangenews.mn>";
+// Sender stays on the Resend-verified orangenews.mn domain until aravtnews.com is verified in Resend
+const DEFAULT_FROM = "Aravt News <noreply@orangenews.mn>";
 
 function isValidEmail(s: string): boolean {
   // Loose RFC-pragmatic check — Resend will hard-validate downstream.
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
     const { error } = await resend.emails.send({
       from: fromAddress,
       to: rawEmail,
-      subject: "Orange News товхимолд бүртгэлээ баталгаажуулна уу",
+      subject: "Aravt News товхимолд бүртгэлээ баталгаажуулна уу",
       html,
     });
     if (error) {

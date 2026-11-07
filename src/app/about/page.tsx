@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Бидний тухай — Orange News",
+  title: "Бидний тухай — Aravt News",
   description:
-    "Orange News нь Монгол Улсын зах зээл, эдийн засгийн мэдээллийг хүргэх датанд суурилсан мэргэжлийн платформ юм.",
+    "Aravt News нь Монгол Улсын зах зээл, эдийн засгийн мэдээллийг хүргэх датанд суурилсан мэргэжлийн платформ юм.",
 };
 
 export default function AboutPage() {
@@ -23,7 +23,7 @@ export default function AboutPage() {
 
       <div className="mt-8 space-y-6 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
         <p>
-          Orange News нь Монгол Улсын хөрөнгийн зах зээл, макро эдийн засаг
+          Aravt News нь Монгол Улсын хөрөнгийн зах зээл, макро эдийн засаг
           болон дэлхийн санхүү, технологийн салбарын мэдээллийг цаг алдалгүй,
           хараат бусаар хүргэх зорилго бүхий датанд суурилсан мэргэжлийн
           мэдээллийн платформ юм.
@@ -48,7 +48,7 @@ export default function AboutPage() {
         Технологи болон автоматжуулалт
       </h3>
       <p className="mt-4 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
-        Orange News нь Azurise AI ecosystem-ийн нэг хэсэг бөгөөд автоматжуулсан
+        Aravt News нь Azurise AI ecosystem-ийн нэг хэсэг бөгөөд автоматжуулсан
         pipeline, хиймэл оюун ухааны орчуулга, эх сурвалжийн quality control
         механизм, real-time зах зээлийн дата feed зэрэг дэвшилтэт технологийн
         шийдлүүдэд тулгуурладаг.

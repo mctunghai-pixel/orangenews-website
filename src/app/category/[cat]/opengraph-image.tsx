@@ -8,7 +8,7 @@ import { fetchOrangeNews } from "@/lib/fetch-orange-news";
 import { isValidCategorySlug, slugToCategory } from "@/lib/category-slug";
 
 export const runtime = "edge";
-export const alt = "Orange News category";
+export const alt = "Aravt News category";
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 

@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Редакцийн баг — Orange News",
+  title: "Редакцийн баг — Aravt News",
   description:
-    "Orange News-ийн редакц нь эдийн засаг, санхүүгийн чиглэлээр мэргэшсэн сэтгүүлчид, дата шинжээчид болон технологийн хөгжүүлэгчдийн хамтын ажиллагаан дээр тулгуурладаг.",
+    "Aravt News-ийн редакц нь эдийн засаг, санхүүгийн чиглэлээр мэргэшсэн сэтгүүлчид, дата шинжээчид болон технологийн хөгжүүлэгчдийн хамтын ажиллагаан дээр тулгуурладаг.",
 };
 
 export default function TeamPage() {

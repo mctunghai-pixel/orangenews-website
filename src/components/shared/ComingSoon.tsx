@@ -34,10 +34,10 @@ export function ComingSoon({
         </p>
 
         <a
-          href="mailto:info@orangenews.mn"
+          href="mailto:info@aravtnews.com"
           className="mt-8 inline-block font-sans text-[14px] text-accent hover:underline"
         >
-          info@orangenews.mn
+          info@aravtnews.com
         </a>
       </div>
     </main>

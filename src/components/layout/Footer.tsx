@@ -1,9 +1,8 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 const socialLinks = [
-  { label: "Facebook", code: "FB", href: "https://www.facebook.com/orangenews.mn" },
-  { label: "Instagram", code: "IG", href: "https://www.instagram.com/orangenews.official" },
-  { label: "Threads", code: "TH", href: "https://www.threads.net/@orangenews.official" },
+  { label: "Facebook", code: "FB", href: "https://www.facebook.com/AravtNews" },
   { label: "Telegram", code: "TG", href: "https://t.me/OrangeNewsMN" },
 ];
 
@@ -78,10 +77,10 @@ export function Footer() {
       <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 md:py-14">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[repeat(14,minmax(0,1fr))]">
           <div className="lg:col-span-4">
-            <Link href="/" className="flex items-center gap-2" aria-label="Orange News нүүр">
-              <span className="inline-block h-2 w-2 rounded-full bg-accent" aria-hidden />
+            <Link href="/" className="flex items-center gap-2" aria-label="Aravt News нүүр">
+              <BrandMark size={28} />
               <span className="font-serif-display text-[22px] font-bold">
-                Orange News
+                Aravt News
               </span>
             </Link>
             <p className="mt-3 max-w-sm font-serif-body text-[13px] leading-relaxed text-muted">
@@ -137,7 +136,7 @@ export function Footer() {
 
         <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 md:flex-row md:items-center md:justify-between">
           <p className="font-sans text-[11px] text-muted">
-            © {year} Orange News. Бүх эрх хуулиар хамгаалагдсан.
+            © {year} Aravt News. Бүх эрх хуулиар хамгаалагдсан.
           </p>
           <p className="font-mono text-[10px] text-muted tabular-nums">
             Powered by Azurise AI · orange-news-automation v8.1

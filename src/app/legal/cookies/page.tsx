@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { LegalPageLayout } from "@/components/legal/LegalPageLayout";
 
 export const metadata: Metadata = {
-  title: "Cookie бодлого — Orange News",
+  title: "Cookie бодлого — Aravt News",
   description:
-    "Orange News сайт ашигладаг Cookie технологийн төрөл, зорилго болон удирдах боломжуудын талаарх дэлгэрэнгүй мэдээлэл.",
+    "Aravt News сайт ашигладаг Cookie технологийн төрөл, зорилго болон удирдах боломжуудын талаарх дэлгэрэнгүй мэдээлэл.",
 };
 
 export default function CookiesPage() {
@@ -12,7 +12,7 @@ export default function CookiesPage() {
     <LegalPageLayout
       title="Cookie бодлого"
       effectiveDate="2026 оны 4 сарын 30"
-      intro={`Манай Orange News платформ нь хэрэглэгчийн туршлагыг сайжруулах, сайтын хурд болон хүртээмжийг нэмэгдүүлэх зорилгоор "Cookie" болон ижил төстэй мөрдөх технологиудыг ашигладаг.`}
+      intro={`Манай Aravt News платформ нь хэрэглэгчийн туршлагыг сайжруулах, сайтын хурд болон хүртээмжийг нэмэгдүүлэх зорилгоор "Cookie" болон ижил төстэй мөрдөх технологиудыг ашигладаг.`}
     >
       <h2>Нэг. Cookie гэж юу вэ?</h2>
       <p>
@@ -58,7 +58,7 @@ export default function CookiesPage() {
       <h2>Дөрөв. Холбоо барих</h2>
       <p>
         Cookie-той холбоотой асуултыг{" "}
-        <a href="mailto:info@orangenews.mn">info@orangenews.mn</a> хаягаар
+        <a href="mailto:info@aravtnews.com">info@aravtnews.com</a> хаягаар
         илгээнэ үү.
       </p>
     </LegalPageLayout>

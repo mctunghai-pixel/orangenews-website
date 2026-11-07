@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Developer API — Orange News",
+  title: "Developer API — Aravt News",
   description:
-    "Orange News API: зах зээлийн дата, нийтлэлийн архив, real-time индексүүдэд RESTful endpoint-аар хандах боломж.",
+    "Aravt News API: зах зээлийн дата, нийтлэлийн архив, real-time индексүүдэд RESTful endpoint-аар хандах боломж.",
 };
 
 export default function ApiDocsPage() {
@@ -18,7 +18,7 @@ export default function ApiDocsPage() {
       </Link>
 
       <h1 className="font-serif-display text-[28px] md:text-[40px] font-bold leading-tight">
-        Orange News Developer API
+        Aravt News Developer API
       </h1>
       <p className="mt-3 font-serif-body text-[16px] md:text-[17px] leading-[1.8] text-muted">
         Манай зах зээлийн дата болон мэдээллийн санд программчлалын аргаар
@@ -27,7 +27,7 @@ export default function ApiDocsPage() {
 
       <p className="mt-8 font-serif-body text-[16px] md:text-[17px] leading-[1.8]">
         Орчин үеийн санхүүгийн платформ, финтек app, бизнес intelligence
-        solution-уудад зориулсан Orange News API нь манай зах зээлийн дата,
+        solution-уудад зориулсан Aravt News API нь манай зах зээлийн дата,
         нийтлэлийн архив, болон real-time индексүүдийг RESTful endpoint-аар
         хүргэх боломжийг олгоно.
       </p>
@@ -71,10 +71,10 @@ export default function ApiDocsPage() {
         Developer API access тун удахгүй нээгдэнэ. Эрт хандах эрхийг авахын
         тулд{" "}
         <a
-          href="mailto:info@orangenews.mn"
+          href="mailto:info@aravtnews.com"
           className="text-accent hover:underline"
         >
-          info@orangenews.mn
+          info@aravtnews.com
         </a>{" "}
         хаягаар хүсэлтээ илгээнэ үү.
       </p>

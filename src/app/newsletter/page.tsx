@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { SubscribeForm } from "@/components/subscribe/SubscribeForm";
 
 export const metadata: Metadata = {
-  title: "Товхимол — Orange News",
+  title: "Товхимол — Aravt News",
   description:
-    "Orange News товхимол: өглөө бүр зах зээлийн өдрийн тойм, индексүүдийн өөрчлөлт, онцлох нийтлэлүүд имэйлээр.",
+    "Aravt News товхимол: өглөө бүр зах зээлийн өдрийн тойм, индексүүдийн өөрчлөлт, онцлох нийтлэлүүд имэйлээр.",
 };
 
 export default function NewsletterPage() {
@@ -19,7 +19,7 @@ export default function NewsletterPage() {
       </Link>
 
       <h1 className="font-serif-display text-[28px] md:text-[40px] font-bold leading-tight">
-        Orange News Товхимол
+        Aravt News Товхимол
       </h1>
       <p className="mt-3 font-serif-body text-[16px] md:text-[17px] leading-[1.8] text-muted">
         Өглөө бүр зах зээлийн өдрийн тойм имэйл хайрцагт тань.
