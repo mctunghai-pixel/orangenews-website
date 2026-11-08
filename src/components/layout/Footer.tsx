@@ -4,6 +4,7 @@ import { BrandMark } from "@/components/brand/BrandMark";
 const socialLinks = [
   { label: "Facebook", code: "FB", href: "https://www.facebook.com/AravtNews" },
   { label: "Instagram", code: "IG", href: "https://www.instagram.com/aravtnews" },
+  { label: "Threads", code: "TH", href: "https://www.threads.com/@aravtnews" },
   { label: "Telegram", code: "TG", href: "https://t.me/AravtNews" },
 ];
 
