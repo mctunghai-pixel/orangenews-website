@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 
 const socials: Array<{ label: string; href: string }> = [
   { label: "Facebook", href: "https://www.facebook.com/AravtNews" },
+  { label: "Instagram", href: "https://www.instagram.com/aravtnews" },
   { label: "Telegram", href: "https://t.me/OrangeNewsMN" },
 ];
 

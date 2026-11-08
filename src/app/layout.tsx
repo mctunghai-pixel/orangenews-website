@@ -47,11 +47,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Aravt News — Монгол Улсын санхүүгийн сэтгүүлч",
   description:
-    "Bloomberg-ийг санагдуулам монгол санхүү, технологи, эдийн засгийн редакцлагдсан урсгал. Автомат pipeline-ээр шинэчлэгдэнэ.",
+    "Дэлхийн санхүү, зах зээл, технологийн мэдээ — Монгол хэлээр, өдөр бүр.",
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Aravt News — Монгол Улсын санхүүгийн сэтгүүлч",
     description:
       "Санхүү, технологи, эдийн засгийн өдөр тутмын редакцлагдсан урсгал.",
+    url: "/",
     locale: "mn_MN",
     type: "website",
     siteName: "Aravt News",
