@@ -141,7 +141,7 @@ export function Footer() {
             © {year} Aravt News. Бүх эрх хуулиар хамгаалагдсан.
           </p>
           <p className="font-mono text-[10px] text-muted tabular-nums">
-            Powered by Azurise AI · orange-news-automation v8.1
+            Powered by Azurise AI · BIG DATA LLC
           </p>
         </div>
       </div>
