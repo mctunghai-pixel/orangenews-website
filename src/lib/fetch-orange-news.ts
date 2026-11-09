@@ -119,21 +119,6 @@ function generateId(url: string | undefined, idx: number): string {
   return `live-${idx}`;
 }
 
-/** Convert Date to Mongolian Cyrillic relative time */
-function timeAgoMongolian(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-
-  if (diffMin < 1) return "Сая";
-  if (diffMin < 60) return `${diffMin} минутын өмнө`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr} цагийн өмнө`;
-  const diffDay = Math.floor(diffHr / 24);
-  if (diffDay === 1) return "Өчигдөр";
-  if (diffDay < 7) return `${diffDay} өдрийн өмнө`;
-  return date.toLocaleDateString("mn-MN");
-}
 
 /** Estimate read time in minutes based on body word count */
 function estimateReadTime(text: string): number {
@@ -163,6 +148,18 @@ function makeExcerpt(post: OrangeNewsPost): string {
   return lines.join(" ").substring(0, 200);
 }
 
+/** fix21: posts carry a calendar date, not a clock time — label by MNT day
+ *  ("Өнөөдөр" / "Өчигдөр" / "11 сарын 7") instead of a fake "Сая". */
+function dayLabelMongolian(date: Date): string {
+  const ymd = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Ulaanbaatar" });
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 86400000);
+  if (ymd(date) === ymd(today)) return "Өнөөдөр";
+  if (ymd(date) === ymd(yesterday)) return "Өчигдөр";
+  const [, m, d] = ymd(date).split("-").map(Number);
+  return `${m} сарын ${d}`;
+}
+
 /** Map raw OrangeNewsPost (from JSON) → normalized Article.
  *  publishedAt: when archive lookup is in play, callers pass the per-day
  *  snapshot date. Today-only path falls back to fetch time. */
@@ -181,7 +178,7 @@ function mapPost(post: OrangeNewsPost, idx: number, publishedAt: Date = new Date
     source: post.source || "Aravt News",
     sourceUrl,
     publishedAt,
-    timeAgo: timeAgoMongolian(publishedAt),
+    timeAgo: dayLabelMongolian(publishedAt),
     readTime: estimateReadTime(body),
     score: post.score ?? 0,
     pattern: pickPattern(category),
@@ -295,7 +292,9 @@ export async function fetchOrangeNews(
       }
       const rawData = await response.json();
       if (!Array.isArray(rawData)) throw new Error("Invalid JSON: expected array");
-      buckets = [{ posts: rawData as OrangeNewsPost[], publishedAt: fetchedAt }];
+      const posts = rawData as OrangeNewsPost[];
+      const genDate = posts.find((p) => p.generated_date)?.generated_date?.slice(0, 10);
+      buckets = [{ posts, publishedAt: genDate ? archiveDateToDate(genDate) : fetchedAt }];
     }
 
     // Filter market_watch (handled by dedicated widget) + map across buckets.

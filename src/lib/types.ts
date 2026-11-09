@@ -23,6 +23,7 @@ export type PostType = "news" | "market_watch";
 
 /** Direct mirror of a single post from translated_posts.json */
 export interface OrangeNewsPost {
+  generated_date?: string;   // YYYY-MM-DD (pipeline run day, MNT)
   category: RawCategory;
   badge: string;
   headline: string;
@@ -287,6 +288,7 @@ export interface MseDataResult {
 export interface RawYouTubeVideo {
   id: string;
   title: string;
+  title_mn?: string;          // Mongolian headline (Gemini, cached per video) — fix21
   description: string;
   channel_id: string;
   channel_title: string;

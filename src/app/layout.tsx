@@ -45,12 +45,12 @@ const SITE_URL =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Aravt News — Монгол Улсын санхүүгийн сэтгүүлч",
+  title: "Aravt News — Дэлхийн санхүү, зах зээлийн мэдээ Монгол хэлээр",
   description:
     "Дэлхийн санхүү, зах зээл, технологийн мэдээ — Монгол хэлээр, өдөр бүр.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Aravt News — Монгол Улсын санхүүгийн сэтгүүлч",
+    title: "Aravt News — Дэлхийн санхүү, зах зээлийн мэдээ Монгол хэлээр",
     description:
       "Санхүү, технологи, эдийн засгийн өдөр тутмын редакцлагдсан урсгал.",
     url: "/",

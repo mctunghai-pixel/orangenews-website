@@ -37,7 +37,7 @@ const REVALIDATE_SECONDS = 1800;
 function mapVideo(raw: RawYouTubeVideo): YouTubeVideo {
   return {
     id: raw.id,
-    title: raw.title,
+    title: raw.title_mn?.trim() || raw.title,
     description: raw.description,
     channelId: raw.channel_id,
     channelTitle: raw.channel_title,
