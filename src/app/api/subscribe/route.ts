@@ -14,8 +14,8 @@ import { render } from "@react-email/components";
 import { SubscribeConfirmEmail } from "@/emails/SubscribeConfirmEmail";
 import { signToken, tokenExpiry } from "@/lib/subscribe-token";
 
-// Sender stays on the Resend-verified orangenews.mn domain until aravtnews.com is verified in Resend
-const DEFAULT_FROM = "Aravt News <noreply@orangenews.mn>";
+// aravtnews.com verified in Resend on 2026-11-09 (orangenews.mn is being retired).
+const DEFAULT_FROM = "Aravt News <noreply@aravtnews.com>";
 
 function isValidEmail(s: string): boolean {
   // Loose RFC-pragmatic check — Resend will hard-validate downstream.
@@ -47,7 +47,11 @@ export async function POST(request: Request) {
 
   const apiKey = process.env.RESEND_API_KEY;
   const audienceId = process.env.RESEND_AUDIENCE_ID;
-  const fromAddress = process.env.RESEND_FROM_EMAIL ?? DEFAULT_FROM;
+  // A legacy RESEND_FROM_EMAIL still pointing at orangenews.mn (or the Resend
+  // sandbox) is ignored so mail always leaves from the verified brand domain.
+  const envFrom = process.env.RESEND_FROM_EMAIL?.trim();
+  const fromAddress =
+    envFrom && /@aravtnews\.com>?$/i.test(envFrom) ? envFrom : DEFAULT_FROM;
 
   if (!apiKey || !audienceId) {
     console.error("[subscribe] RESEND_API_KEY or RESEND_AUDIENCE_ID not set");
